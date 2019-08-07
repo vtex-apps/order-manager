@@ -24,6 +24,8 @@ enqueue(taskB, "coupon");
 
 The point of this feature is to avoid making requests that are stale.
 
+Returns a promise that resolves when the task is completed.
+
 #### Use cases
 
 1. If the user submits a coupon code, the task is scheduled, then changes and type another coupon code, we can avoid making the first request since the second will superseed it.
@@ -45,6 +47,6 @@ Returns a function to unsubscribe callback from events.
 
 ## Internal spec
 
-### `private queue = Promises[]`
+### `private queue = Promise[]`
 
 Array of requests to be satisfied.
