@@ -1,0 +1,12 @@
+{
+  "vendor": "vtex",
+  "name": "order-manager",
+  "version": "0.0.1",
+  "title": "Order Manager",
+  "description": "Order Manager",
+  "defaultLocale": "pt-BR",
+  "builders": {
+    "react": "3.x"
+  },
+  "mustUpdateAt": "2019-04-02",
+}

@@ -4,7 +4,7 @@
 
 ## API
 
-### `enqueue(task: Promise, id?: string): Promise`
+### `enqueue(task: () => Promise, id?: string): Promise`
 
 Add a task to the queue of requests to the Checkout API. `task` will be called when it's the first in the queue.
 
