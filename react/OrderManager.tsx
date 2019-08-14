@@ -1,4 +1,4 @@
-import React, { createContext, ReactNode, useContext } from 'react'
+import React, { createContext, ReactNode, useContext, useState, useMemo } from 'react'
 import { QueueEvent, TaskQueue } from './TaskQueue'
 
 interface Context {
@@ -15,12 +15,14 @@ const OrderManagerContext = createContext<Context | undefined>(undefined)
 export const OrderManagerProvider = ({
   children,
 }: OrderManagerProviderProps) => {
-  const queue = new TaskQueue()
+  const [queue] = useState(() => new TaskQueue())
+  const value = useMemo(() => ({
+    enqueue: queue.push.bind(queue),
+    listen: queue.on.bind(queue),
+  }), [queue])
 
   return (
-    <OrderManagerContext.Provider
-      value={{ enqueue: queue.push.bind(queue), listen: queue.on.bind(queue) }}
-    >
+    <OrderManagerContext.Provider value={value}>
       {children}
     </OrderManagerContext.Provider>
   )
