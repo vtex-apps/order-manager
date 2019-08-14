@@ -27,7 +27,7 @@ export class TaskQueue {
     })
   }
 
-  push(task: () => Promise<any>, id?: string) {
+  enqueue(task: () => Promise<any>, id?: string) {
     if (this.isEmpty) {
       this.isEmpty = false;
       this.emit('Pending')
@@ -49,7 +49,7 @@ export class TaskQueue {
     return promise
   }
 
-  on(event: QueueEvent, cb: () => any) {
+  listen(event: QueueEvent, cb: () => any) {
     if (!this.listeners[event]) {
       this.listeners[event] = []
     }

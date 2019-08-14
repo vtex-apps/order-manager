@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState, useEffect } from 'react'
+import React, { FunctionComponent, useEffect } from 'react'
 import { render } from '@vtex/test-tools/react'
 
 import { OrderManagerProvider, useOrderManager } from '../OrderManager'

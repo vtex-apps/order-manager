@@ -1,4 +1,4 @@
-import { TaskQueue, TASK_CANCELLED_MSG } from '../TaskQueue'
+import { TaskQueue, TASK_CANCELLED_MSG } from './TaskQueue'
 
 const createScheduledTask = (task: () => any, time: number) => () => new Promise(resolve => {
   setTimeout(() => resolve(task()), time)
@@ -7,7 +7,7 @@ const createScheduledTask = (task: () => any, time: number) => () => new Promise
 describe('TaskQueue', () => {
   it('should execute a task', async () => {
     const queue = new TaskQueue()
-    const result = await queue.push(createScheduledTask(() => 42, 10))
+    const result = await queue.enqueue(createScheduledTask(() => 42, 10))
 
     expect(result).toEqual(42)
   })
@@ -17,9 +17,9 @@ describe('TaskQueue', () => {
     const results: string[] = []
 
     await Promise.all([
-      queue.push(createScheduledTask(() => results.push('1'), 20)),
-      queue.push(createScheduledTask(() => results.push('2'), 10)),
-      queue.push(async () => results.push('3'))
+      queue.enqueue(createScheduledTask(() => results.push('1'), 20)),
+      queue.enqueue(createScheduledTask(() => results.push('2'), 10)),
+      queue.enqueue(async () => results.push('3'))
     ])
 
     expect(results).toEqual(['1', '2', '3'])
@@ -29,10 +29,10 @@ describe('TaskQueue', () => {
     const queue = new TaskQueue()
     const results: string[] = []
 
-    const task1 = queue.push(createScheduledTask(() => results.push('1'), 20), 'foo')
-    const task2 = queue.push(createScheduledTask(() => results.push('2'), 5), 'bar')
-    const task3 = queue.push(createScheduledTask(() => results.push('3'), 5), 'baz')
-    const task4 = queue.push(createScheduledTask(() => results.push('4'), 5), 'bar')
+    const task1 = queue.enqueue(createScheduledTask(() => results.push('1'), 20), 'foo')
+    const task2 = queue.enqueue(createScheduledTask(() => results.push('2'), 5), 'bar')
+    const task3 = queue.enqueue(createScheduledTask(() => results.push('3'), 5), 'baz')
+    const task4 = queue.enqueue(createScheduledTask(() => results.push('4'), 5), 'bar')
 
     expect(task2).rejects.toEqual(TASK_CANCELLED_MSG)
 
@@ -44,11 +44,11 @@ describe('TaskQueue', () => {
   it('should emit a Fulfilled event only when the queue becomes empty', async () => {
     const queue = new TaskQueue()
     const mockFulfilledCb = jest.fn()
-    queue.on('Fulfilled', mockFulfilledCb)
+    queue.listen('Fulfilled', mockFulfilledCb)
 
-    const task1 = queue.push(createScheduledTask(() => {}, 5))
-    const task2 = queue.push(createScheduledTask(() => {}, 5))
-    const task3 = queue.push(createScheduledTask(() => {}, 5))
+    const task1 = queue.enqueue(createScheduledTask(() => {}, 5))
+    const task2 = queue.enqueue(createScheduledTask(() => {}, 5))
+    const task3 = queue.enqueue(createScheduledTask(() => {}, 5))
 
     expect(mockFulfilledCb.mock.calls.length).toBe(0)
     await task1
@@ -62,21 +62,21 @@ describe('TaskQueue', () => {
   it('should emit a Pending event only when the queue is free and receives a task', async () => {
     const queue = new TaskQueue()
     const mockPendingCb = jest.fn()
-    queue.on('Pending', mockPendingCb)
+    queue.listen('Pending', mockPendingCb)
 
     expect(mockPendingCb.mock.calls.length).toBe(0)
-    const task1 = queue.push(createScheduledTask(() => {}, 5))
+    const task1 = queue.enqueue(createScheduledTask(() => {}, 5))
     expect(mockPendingCb.mock.calls.length).toBe(1)
-    const task2 = queue.push(createScheduledTask(() => {}, 5))
-    const task3 = queue.push(createScheduledTask(() => {}, 5))
+    const task2 = queue.enqueue(createScheduledTask(() => {}, 5))
+    const task3 = queue.enqueue(createScheduledTask(() => {}, 5))
     expect(mockPendingCb.mock.calls.length).toBe(1)
 
     await Promise.all([task1, task2, task3])
 
     expect(mockPendingCb.mock.calls.length).toBe(1)
-    queue.push(createScheduledTask(() => {}, 5))
+    queue.enqueue(createScheduledTask(() => {}, 5))
     expect(mockPendingCb.mock.calls.length).toBe(2)
-    queue.push(createScheduledTask(() => {}, 5))
+    queue.enqueue(createScheduledTask(() => {}, 5))
     expect(mockPendingCb.mock.calls.length).toBe(2)
   })
 })
