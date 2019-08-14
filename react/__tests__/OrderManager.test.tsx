@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from 'react'
+import React, { FunctionComponent, useState, useEffect } from 'react'
 import { render } from '@vtex/test-tools/react'
 
 import { OrderManagerProvider, useOrderManager } from '../OrderManager'
@@ -29,9 +29,11 @@ describe('OrderManager', () => {
 
     const InnerComponent: FunctionComponent = () => {
       const { enqueue } = useOrderManager()
-      tasks.push(enqueue(createScheduledTask(() => results.push('1'), 10)))
-      tasks.push(enqueue(createScheduledTask(() => results.push('2'), 5)))
-      tasks.push(enqueue(createScheduledTask(() => results.push('3'), 5)))
+      useEffect(() => {
+        tasks.push(enqueue(createScheduledTask(() => results.push('1'), 10)))
+        tasks.push(enqueue(createScheduledTask(() => results.push('2'), 5)))
+        tasks.push(enqueue(createScheduledTask(() => results.push('3'), 5)))
+      }, [])
       return <div>foo</div>
     }
 
