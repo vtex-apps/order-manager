@@ -9,7 +9,7 @@ import { QueueEvent, TaskQueue } from './modules/TaskQueue'
 
 interface Context {
   enqueue: (task: () => Promise<any>, id?: string) => PromiseLike<void>
-  listen: (event: QueueEvent, callback: () => any) => void
+  listen: (event: QueueEvent, callback: () => any) => () => void
 }
 
 interface OrderManagerProviderProps {

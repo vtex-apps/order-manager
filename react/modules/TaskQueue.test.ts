@@ -92,4 +92,34 @@ describe('TaskQueue', () => {
     queue.enqueue(createScheduledTask(() => {}, 5))
     expect(mockPendingCb.mock.calls.length).toBe(2)
   })
+
+  it('should not call listener callback after unlisten is called', async () => {
+    const queue = new TaskQueue()
+    const mockPendingCb = jest.fn()
+    const unlisten = queue.listen('Pending', mockPendingCb)
+
+    const task = queue.enqueue(async () => {})
+    expect(mockPendingCb.mock.calls.length).toBe(1)
+    await task
+
+    unlisten()
+    queue.enqueue(async () => {})
+    expect(mockPendingCb.mock.calls.length).toBe(1)
+  })
+
+  it('should remove a single listener callback when unlisten is called', async () => {
+    const queue = new TaskQueue()
+    const mockPendingCb = jest.fn()
+    queue.listen('Pending', mockPendingCb)
+    const unlisten = queue.listen('Pending', mockPendingCb)
+    queue.listen('Pending', mockPendingCb)
+
+    const task = queue.enqueue(async () => {})
+    expect(mockPendingCb.mock.calls.length).toBe(3)
+    await task
+
+    unlisten()
+    queue.enqueue(async () => {})
+    expect(mockPendingCb.mock.calls.length).toBe(5)
+  })
 })

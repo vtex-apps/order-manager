@@ -59,6 +59,15 @@ export class TaskQueue {
     }
 
     this.listeners[event].push(cb)
+
+    const unlisten = () => {
+      const index = this.listeners[event].indexOf(cb)
+      if (index !== -1) {
+        this.listeners[event].splice(index, 1)
+      }
+    }
+
+    return unlisten
   }
 
   private emit(event: QueueEvent) {
