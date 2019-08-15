@@ -1,6 +1,10 @@
-import { CancellablePromiseLike, SequentialTaskQueue } from 'sequential-task-queue'
+import {
+  CancellablePromiseLike,
+  SequentialTaskQueue,
+} from 'sequential-task-queue'
 
-export const TASK_CANCELLED_MSG = 'A more recent task with same id has been pushed to the queue.'
+export const TASK_CANCELLED_MSG =
+  'A more recent task with same id has been pushed to the queue.'
 
 export type QueueEvent = 'Pending' | 'Fulfilled'
 
@@ -15,7 +19,7 @@ export class TaskQueue {
   private listeners: Record<QueueEvent, (() => any)[]>
   private isEmpty: boolean
 
-  constructor() {
+  public constructor() {
     this.queue = new SequentialTaskQueue()
     this.taskIdMap = {}
     this.listeners = {} as any
@@ -27,9 +31,9 @@ export class TaskQueue {
     })
   }
 
-  enqueue(task: () => Promise<any>, id?: string) {
+  public enqueue(task: () => Promise<any>, id?: string) {
     if (this.isEmpty) {
-      this.isEmpty = false;
+      this.isEmpty = false
       this.emit('Pending')
     }
 
@@ -49,7 +53,7 @@ export class TaskQueue {
     return promise
   }
 
-  listen(event: QueueEvent, cb: () => any) {
+  public listen(event: QueueEvent, cb: () => any) {
     if (!this.listeners[event]) {
       this.listeners[event] = []
     }

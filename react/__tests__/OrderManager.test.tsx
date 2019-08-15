@@ -3,9 +3,10 @@ import { render } from '@vtex/test-tools/react'
 
 import { OrderManagerProvider, useOrderManager } from '../OrderManager'
 
-const createScheduledTask = (task: () => any, time: number) => () => new Promise(resolve => {
-  setTimeout(() => resolve(task()), time)
-})
+const createScheduledTask = (task: () => any, time: number) => () =>
+  new Promise(resolve => {
+    setTimeout(() => resolve(task()), time)
+  })
 
 describe('OrderManager', () => {
   it('should throw when useOrderManager is called outside a OrderManagerProvider', () => {
@@ -18,7 +19,9 @@ describe('OrderManager', () => {
       return <div>foo</div>
     }
 
-    expect(() => render(<Component />)).toThrow('useOrderManager must be used within a OrderManagerProvider')
+    expect(() => render(<Component />)).toThrow(
+      'useOrderManager must be used within a OrderManagerProvider'
+    )
 
     console.error = oldConsoleError
   })

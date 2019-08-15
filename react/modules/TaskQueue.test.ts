@@ -1,8 +1,9 @@
 import { TaskQueue, TASK_CANCELLED_MSG } from './TaskQueue'
 
-const createScheduledTask = (task: () => any, time: number) => () => new Promise(resolve => {
-  setTimeout(() => resolve(task()), time)
-})
+const createScheduledTask = (task: () => any, time: number) => () =>
+  new Promise(resolve => {
+    setTimeout(() => resolve(task()), time)
+  })
 
 describe('TaskQueue', () => {
   it('should execute a task', async () => {
@@ -19,7 +20,7 @@ describe('TaskQueue', () => {
     await Promise.all([
       queue.enqueue(createScheduledTask(() => results.push('1'), 20)),
       queue.enqueue(createScheduledTask(() => results.push('2'), 10)),
-      queue.enqueue(async () => results.push('3'))
+      queue.enqueue(async () => results.push('3')),
     ])
 
     expect(results).toEqual(['1', '2', '3'])
@@ -29,10 +30,22 @@ describe('TaskQueue', () => {
     const queue = new TaskQueue()
     const results: string[] = []
 
-    const task1 = queue.enqueue(createScheduledTask(() => results.push('1'), 20), 'foo')
-    const task2 = queue.enqueue(createScheduledTask(() => results.push('2'), 5), 'bar')
-    const task3 = queue.enqueue(createScheduledTask(() => results.push('3'), 5), 'baz')
-    const task4 = queue.enqueue(createScheduledTask(() => results.push('4'), 5), 'bar')
+    const task1 = queue.enqueue(
+      createScheduledTask(() => results.push('1'), 20),
+      'foo'
+    )
+    const task2 = queue.enqueue(
+      createScheduledTask(() => results.push('2'), 5),
+      'bar'
+    )
+    const task3 = queue.enqueue(
+      createScheduledTask(() => results.push('3'), 5),
+      'baz'
+    )
+    const task4 = queue.enqueue(
+      createScheduledTask(() => results.push('4'), 5),
+      'bar'
+    )
 
     expect(task2).rejects.toEqual(TASK_CANCELLED_MSG)
 
