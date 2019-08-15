@@ -14,7 +14,6 @@ describe('OrderManager', () => {
     console.error = () => {}
 
     const Component: FunctionComponent = () => {
-      console.error = () => {}
       useOrderManager()
       return <div>foo</div>
     }
