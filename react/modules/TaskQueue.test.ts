@@ -63,13 +63,13 @@ describe('TaskQueue', () => {
     const task2 = queue.enqueue(createScheduledTask(() => {}, 5))
     const task3 = queue.enqueue(createScheduledTask(() => {}, 5))
 
-    expect(mockFulfilledCb.mock.calls.length).toBe(0)
+    expect(mockFulfilledCb).toHaveBeenCalledTimes(0)
     await task1
-    expect(mockFulfilledCb.mock.calls.length).toBe(0)
+    expect(mockFulfilledCb).toHaveBeenCalledTimes(0)
     await task2
-    expect(mockFulfilledCb.mock.calls.length).toBe(0)
+    expect(mockFulfilledCb).toHaveBeenCalledTimes(0)
     await task3
-    expect(mockFulfilledCb.mock.calls.length).toBe(1)
+    expect(mockFulfilledCb).toHaveBeenCalledTimes(1)
   })
 
   it('should emit a Pending event only when the queue is free and receives a task', async () => {
@@ -77,20 +77,20 @@ describe('TaskQueue', () => {
     const mockPendingCb = jest.fn()
     queue.listen('Pending', mockPendingCb)
 
-    expect(mockPendingCb.mock.calls.length).toBe(0)
+    expect(mockPendingCb).toHaveBeenCalledTimes(0)
     const task1 = queue.enqueue(createScheduledTask(() => {}, 5))
-    expect(mockPendingCb.mock.calls.length).toBe(1)
+    expect(mockPendingCb).toHaveBeenCalledTimes(1)
     const task2 = queue.enqueue(createScheduledTask(() => {}, 5))
     const task3 = queue.enqueue(createScheduledTask(() => {}, 5))
-    expect(mockPendingCb.mock.calls.length).toBe(1)
+    expect(mockPendingCb).toHaveBeenCalledTimes(1)
 
     await Promise.all([task1, task2, task3])
 
-    expect(mockPendingCb.mock.calls.length).toBe(1)
+    expect(mockPendingCb).toHaveBeenCalledTimes(1)
     queue.enqueue(createScheduledTask(() => {}, 5))
-    expect(mockPendingCb.mock.calls.length).toBe(2)
+    expect(mockPendingCb).toHaveBeenCalledTimes(2)
     queue.enqueue(createScheduledTask(() => {}, 5))
-    expect(mockPendingCb.mock.calls.length).toBe(2)
+    expect(mockPendingCb).toHaveBeenCalledTimes(2)
   })
 
   it('should not call listener callback after unlisten is called', async () => {
@@ -99,12 +99,12 @@ describe('TaskQueue', () => {
     const unlisten = queue.listen('Pending', mockPendingCb)
 
     const task = queue.enqueue(async () => {})
-    expect(mockPendingCb.mock.calls.length).toBe(1)
+    expect(mockPendingCb).toHaveBeenCalledTimes(1)
     await task
 
     unlisten()
     queue.enqueue(async () => {})
-    expect(mockPendingCb.mock.calls.length).toBe(1)
+    expect(mockPendingCb).toHaveBeenCalledTimes(1)
   })
 
   it('should remove a single listener callback when unlisten is called', async () => {
@@ -115,11 +115,11 @@ describe('TaskQueue', () => {
     queue.listen('Pending', mockPendingCb)
 
     const task = queue.enqueue(async () => {})
-    expect(mockPendingCb.mock.calls.length).toBe(3)
+    expect(mockPendingCb).toHaveBeenCalledTimes(3)
     await task
 
     unlisten()
     queue.enqueue(async () => {})
-    expect(mockPendingCb.mock.calls.length).toBe(5)
+    expect(mockPendingCb).toHaveBeenCalledTimes(5)
   })
 })
