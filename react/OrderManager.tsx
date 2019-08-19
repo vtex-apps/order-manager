@@ -1,9 +1,15 @@
-import React, { createContext, ReactNode, useContext, useState, useMemo } from 'react'
+import React, {
+  createContext,
+  ReactNode,
+  useContext,
+  useState,
+  useMemo,
+} from 'react'
 import { QueueEvent, TaskQueue } from './modules/TaskQueue'
 
 interface Context {
   enqueue: (task: () => Promise<any>, id?: string) => PromiseLike<void>
-  listen: (event: QueueEvent, callback: () => any) => void
+  listen: (event: QueueEvent, callback: () => any) => () => void
 }
 
 interface OrderManagerProviderProps {
@@ -16,10 +22,13 @@ export const OrderManagerProvider = ({
   children,
 }: OrderManagerProviderProps) => {
   const [queue] = useState(() => new TaskQueue())
-  const value = useMemo(() => ({
-    enqueue: queue.enqueue.bind(queue),
-    listen: queue.listen.bind(queue),
-  }), [queue])
+  const value = useMemo(
+    () => ({
+      enqueue: queue.enqueue.bind(queue),
+      listen: queue.listen.bind(queue),
+    }),
+    [queue]
+  )
 
   return (
     <OrderManagerContext.Provider value={value}>

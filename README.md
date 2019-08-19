@@ -2,6 +2,23 @@
 
 > Centralizes the requests queue to the Checkout API.
 
+## Usage
+
+```tsx
+import { OrderManagerProvider, useOrderManager } from 'vtex.order-manager/OrderManager'
+
+const MainComponent: FunctionComponent = () => (
+  <OrderManagerProvider>
+    <MyComponent />
+  </OrderManagerProvider>
+)
+
+const MyComponent: FunctionComponent = () => {
+  const { enqueue, listen } = useOrderManager()
+  //...
+}
+```
+
 ## API
 
 ### `enqueue(task: () => Promise, id?: string): Promise`
