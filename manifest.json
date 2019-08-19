@@ -1,7 +1,7 @@
 {
   "vendor": "vtex",
   "name": "order-manager",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "title": "Order Manager",
   "description": "Order Manager",
   "defaultLocale": "pt-BR",
