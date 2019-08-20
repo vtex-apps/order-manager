@@ -5,8 +5,7 @@
 ## Usage
 
 ```tsx
-import { OrderManager } from 'vtex.order-manager'
-const { OrderManagerProvider, useOrderManager } = OrderManager
+import { OrderManagerProvider, useOrderManager } from 'vtex.order-manager/OrderManager'
 
 const MainComponent: FunctionComponent = () => (
   <OrderManagerProvider>
