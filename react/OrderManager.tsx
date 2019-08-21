@@ -18,7 +18,7 @@ interface OrderManagerProviderProps {
 
 const OrderManagerContext = createContext<Context | undefined>(undefined)
 
-const OrderManagerProvider = ({
+export const OrderManagerProvider = ({
   children,
 }: OrderManagerProviderProps) => {
   const [queue] = useState(() => new TaskQueue())
@@ -37,7 +37,7 @@ const OrderManagerProvider = ({
   )
 }
 
-const useOrderManager = () => {
+export const useOrderManager = () => {
   const context = useContext(OrderManagerContext)
   if (context === undefined) {
     throw new Error(
