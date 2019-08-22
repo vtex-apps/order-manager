@@ -1,4 +1,4 @@
-import { TaskQueue, TASK_CANCELLED_MSG } from './TaskQueue'
+import { TaskQueue, TASK_CANCELLED_CODE, TASK_CANCELLED_MSG } from './TaskQueue'
 
 const createScheduledTask = (task: () => any, time: number) => () =>
   new Promise(resolve => {
@@ -47,7 +47,10 @@ describe('TaskQueue', () => {
       'bar'
     )
 
-    expect(task2).rejects.toEqual(TASK_CANCELLED_MSG)
+    expect(task2).rejects.toEqual({
+      code: TASK_CANCELLED_CODE,
+      message: TASK_CANCELLED_MSG,
+    })
 
     await Promise.all([task1, task3, task4])
 
