@@ -3,6 +3,7 @@ import {
   SequentialTaskQueue,
 } from 'sequential-task-queue'
 
+export const TASK_CANCELLED_CODE = 'TASK_CANCELLED'
 export const TASK_CANCELLED_MSG =
   'A more recent task with same id has been pushed to the queue.'
 
@@ -38,7 +39,10 @@ export class TaskQueue {
     }
 
     if (id && this.taskIdMap[id]) {
-      this.taskIdMap[id].promise.cancel(TASK_CANCELLED_MSG)
+      this.taskIdMap[id].promise.cancel({
+        code: TASK_CANCELLED_CODE,
+        message: TASK_CANCELLED_MSG,
+      })
     }
 
     const promise = this.queue.push(task)
