@@ -1,6 +1,6 @@
 # Order Manager
 
-> Centralizes the requests queue to the Checkout API.
+> Centralizes the requests queue to the Checkout API and manages order form data.
 
 ## Usage
 
@@ -61,6 +61,22 @@ Returns a function to unsubscribe callback from events.
 #### Use cases
 
 1. Make it possible to add loaders or disable the Checkout button when there are tasks to resolve.
+
+### `loading: boolean`
+
+This flag is set to `true` only when `OrderManager` is loading the order form during render. In order to know whether a task is ongoing, use `listen` instead.
+
+#### Use cases
+
+1. Make it possible to render a loading state when loading a page.
+
+### `orderForm: OrderForm`
+
+Contains data from the order form. Do not modify this directly, use `setOrderForm` instead.
+
+### `setOrderForm: (newOrderForm: OrderForm) => void`
+
+Updates the order form stored in `OrderManager`. This should be called after each mutation to ensure that client data does not get out of sync with server data and that other `OrderManager` consumers can react to this update.
 
 ## Internal spec
 
