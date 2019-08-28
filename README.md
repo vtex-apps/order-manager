@@ -5,21 +5,25 @@
 ## Usage
 
 ```tsx
-import { OrderManagerProvider, useOrderManager } from 'vtex.order-manager/OrderManager'
+import { OrderQueueProvider, useOrderQueue } from 'vtex.order-manager/OrderQueue'
+import { OrderFormProvider, useOrderForm } from 'vtex.order-manager/OrderForm'
 
 const MainComponent: FunctionComponent = () => (
-  <OrderManagerProvider>
-    <MyComponent />
-  </OrderManagerProvider>
+  <OrderQueueProvider>
+    <OrderFormProvider>
+      <MyComponent />
+    </OrderFormProvider>
+  </OrderQueueProvider>
 )
 
 const MyComponent: FunctionComponent = () => {
-  const { enqueue, listen } = useOrderManager()
+  const { enqueue, listen } = useOrderQueue()
+  const { orderForm, setOrderForm } = useOrderForm()
   //...
 }
 ```
 
-## API
+## `OrderQueue` API
 
 ### `enqueue(task: () => Promise, id?: string): Promise`
 
@@ -61,6 +65,8 @@ Returns a function to unsubscribe callback from events.
 #### Use cases
 
 1. Make it possible to add loaders or disable the Checkout button when there are tasks to resolve.
+
+## `OrderForm` API
 
 ### `loading: boolean`
 

@@ -10,28 +10,23 @@ import { branch, renderComponent } from 'recompose'
 import { compose, graphql } from 'react-apollo'
 
 import OrderFormQuery from './graphql/orderForm.graphql'
-import { QueueEvent, TaskQueue } from './modules/TaskQueue'
 
 interface Context {
-  enqueue: (task: () => Promise<any>, id?: string) => PromiseLike<void>
-  listen: (event: QueueEvent, callback: () => any) => () => void
   loading: boolean
   orderForm: OrderForm | undefined
   setOrderForm: (orderForm: OrderForm) => void
 }
 
-interface OrderManagerProviderProps {
+interface OrderFormProviderProps {
   children: ReactNode
   OrderFormQuery: any
 }
 
-const OrderManagerContext = createContext<Context | undefined>(undefined)
+const OrderFormContext = createContext<Context | undefined>(undefined)
 
 const LoadingState: FunctionComponent = ({ children }: any) => {
   const value = useMemo(
     () => ({
-      enqueue: async () => {},
-      listen: () => () => {},
       loading: true,
       orderForm: undefined,
       setOrderForm: () => {},
@@ -40,49 +35,44 @@ const LoadingState: FunctionComponent = ({ children }: any) => {
   )
 
   return (
-    <OrderManagerContext.Provider value={value}>
+    <OrderFormContext.Provider value={value}>
       {children}
-    </OrderManagerContext.Provider>
+    </OrderFormContext.Provider>
   )
 }
 
-export const OrderManagerProvider = compose(
+export const OrderFormProvider = compose(
   graphql(OrderFormQuery, { name: 'OrderFormQuery', options: { ssr: false } }),
   branch(
     ({ OrderFormQuery }: any) => !!OrderFormQuery.loading,
     renderComponent(LoadingState)
   )
-)(({ children, OrderFormQuery }: OrderManagerProviderProps) => {
-  const [queue] = useState(() => new TaskQueue())
+)(({ children, OrderFormQuery }: OrderFormProviderProps) => {
   const [orderForm, setOrderForm] = useState(OrderFormQuery.orderForm)
 
   const value = useMemo(
     () => ({
-      enqueue: queue.enqueue.bind(queue),
-      listen: queue.listen.bind(queue),
       loading: false,
       orderForm,
       setOrderForm,
     }),
-    [queue, orderForm]
+    [orderForm]
   )
 
   return (
-    <OrderManagerContext.Provider value={value}>
+    <OrderFormContext.Provider value={value}>
       {children}
-    </OrderManagerContext.Provider>
+    </OrderFormContext.Provider>
   )
 })
 
-export const useOrderManager = () => {
-  const context = useContext(OrderManagerContext)
+export const useOrderForm = () => {
+  const context = useContext(OrderFormContext)
   if (context === undefined) {
-    throw new Error(
-      'useOrderManager must be used within a OrderManagerProvider'
-    )
+    throw new Error('useOrderForm must be used within a OrderFormProvider')
   }
 
   return context
 }
 
-export default { OrderManagerProvider, useOrderManager }
+export default { OrderFormProvider, useOrderForm }
