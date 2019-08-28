@@ -1,25 +1,25 @@
 import React, { FunctionComponent, useEffect } from 'react'
 import { render } from '@vtex/test-tools/react'
 
-import { OrderManagerProvider, useOrderManager } from '../OrderManager'
+import { OrderQueueProvider, useOrderQueue } from '../OrderQueue'
 
 const createScheduledTask = (task: () => any, time: number) => () =>
   new Promise(resolve => {
     setTimeout(() => resolve(task()), time)
   })
 
-describe('OrderManager', () => {
-  it('should throw when useOrderManager is called outside a OrderManagerProvider', () => {
+describe('OrderQueue', () => {
+  it('should throw when useOrderQueue is called outside a OrderQueueProvider', () => {
     const oldConsoleError = console.error
     console.error = () => {}
 
     const Component: FunctionComponent = () => {
-      useOrderManager()
+      useOrderQueue()
       return <div>foo</div>
     }
 
     expect(() => render(<Component />)).toThrow(
-      'useOrderManager must be used within a OrderManagerProvider'
+      'useOrderQueue must be used within a OrderQueueProvider'
     )
 
     console.error = oldConsoleError
@@ -30,7 +30,7 @@ describe('OrderManager', () => {
     const tasks: PromiseLike<any>[] = []
 
     const InnerComponent: FunctionComponent = () => {
-      const { enqueue } = useOrderManager()
+      const { enqueue } = useOrderQueue()
       useEffect(() => {
         tasks.push(enqueue(createScheduledTask(() => results.push('1'), 10)))
         tasks.push(enqueue(createScheduledTask(() => results.push('2'), 5)))
@@ -40,9 +40,9 @@ describe('OrderManager', () => {
     }
 
     const OuterComponent: FunctionComponent = () => (
-      <OrderManagerProvider>
+      <OrderQueueProvider>
         <InnerComponent />
-      </OrderManagerProvider>
+      </OrderQueueProvider>
     )
 
     render(<OuterComponent />)
