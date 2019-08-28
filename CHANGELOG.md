@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
-- Order form data;
+- Order form data.
 - `loading` flag that informs whether `OrderManager` is currently fetching the order form.
 
 ## [0.2.0] - 2019-08-22
