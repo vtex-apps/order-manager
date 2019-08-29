@@ -1,25 +1,29 @@
 # Order Manager
 
-> Centralizes the requests queue to the Checkout API.
+> Centralizes the requests queue to the Checkout API and manages order form data.
 
 ## Usage
 
 ```tsx
-import { OrderManagerProvider, useOrderManager } from 'vtex.order-manager/OrderManager'
+import { OrderQueueProvider, useOrderQueue } from 'vtex.order-manager/OrderQueue'
+import { OrderFormProvider, useOrderForm } from 'vtex.order-manager/OrderForm'
 
 const MainComponent: FunctionComponent = () => (
-  <OrderManagerProvider>
-    <MyComponent />
-  </OrderManagerProvider>
+  <OrderQueueProvider>
+    <OrderFormProvider>
+      <MyComponent />
+    </OrderFormProvider>
+  </OrderQueueProvider>
 )
 
 const MyComponent: FunctionComponent = () => {
-  const { enqueue, listen } = useOrderManager()
+  const { enqueue, listen } = useOrderQueue()
+  const { orderForm, setOrderForm } = useOrderForm()
   //...
 }
 ```
 
-## API
+## `OrderQueue` API
 
 ### `enqueue(task: () => Promise, id?: string): Promise`
 
@@ -61,6 +65,24 @@ Returns a function to unsubscribe callback from events.
 #### Use cases
 
 1. Make it possible to add loaders or disable the Checkout button when there are tasks to resolve.
+
+## `OrderForm` API
+
+### `loading: boolean`
+
+This flag is set to `true` only when `OrderManager` is loading the order form during render. In order to know whether a task is ongoing, use `listen` instead.
+
+#### Use cases
+
+1. Make it possible to render a loading state when loading a page.
+
+### `orderForm: OrderForm`
+
+Contains data from the order form. Do not modify this directly, use `setOrderForm` instead.
+
+### `setOrderForm: (newOrderForm: Partial<OrderForm>) => void`
+
+Updates the order form stored in `OrderManager`. This should be called after each mutation to ensure that client data does not get out of sync with server data and that other `OrderManager` consumers can react to this update.
 
 ## Internal spec
 

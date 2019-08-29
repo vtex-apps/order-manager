@@ -1,10 +1,12 @@
 import React, {
   createContext,
+  FC,
   ReactNode,
   useContext,
-  useState,
   useMemo,
+  useState,
 } from 'react'
+
 import { QueueEvent, TaskQueue } from './modules/TaskQueue'
 
 interface Context {
@@ -12,16 +14,17 @@ interface Context {
   listen: (event: QueueEvent, callback: () => any) => () => void
 }
 
-interface OrderManagerProviderProps {
+interface OrderQueueProviderProps {
   children: ReactNode
 }
 
-const OrderManagerContext = createContext<Context | undefined>(undefined)
+const OrderQueueContext = createContext<Context | undefined>(undefined)
 
-export const OrderManagerProvider = ({
+export const OrderQueueProvider: FC<OrderQueueProviderProps> = ({
   children,
-}: OrderManagerProviderProps) => {
+}) => {
   const [queue] = useState(() => new TaskQueue())
+
   const value = useMemo(
     () => ({
       enqueue: queue.enqueue.bind(queue),
@@ -31,21 +34,19 @@ export const OrderManagerProvider = ({
   )
 
   return (
-    <OrderManagerContext.Provider value={value}>
+    <OrderQueueContext.Provider value={value}>
       {children}
-    </OrderManagerContext.Provider>
+    </OrderQueueContext.Provider>
   )
 }
 
-export const useOrderManager = () => {
-  const context = useContext(OrderManagerContext)
+export const useOrderQueue = () => {
+  const context = useContext(OrderQueueContext)
   if (context === undefined) {
-    throw new Error(
-      'useOrderManager must be used within a OrderManagerProvider'
-    )
+    throw new Error('useOrderQueue must be used within a OrderQueueProvider')
   }
 
   return context
 }
 
-export default { OrderManagerProvider, useOrderManager }
+export default { OrderQueueProvider, useOrderQueue }
