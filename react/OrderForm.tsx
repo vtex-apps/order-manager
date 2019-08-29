@@ -4,7 +4,7 @@ import React, {
   ReactNode,
   useContext,
   useMemo,
-  useState,
+  useReducer,
 } from 'react'
 import { branch, renderComponent } from 'recompose'
 import { compose, graphql } from 'react-apollo'
@@ -48,7 +48,13 @@ export const OrderFormProvider = compose(
     renderComponent(LoadingState)
   )
 )(({ children, OrderFormQuery }: OrderFormProviderProps) => {
-  const [orderForm, setOrderForm] = useState(OrderFormQuery.orderForm)
+  const [orderForm, setOrderForm] = useReducer(
+    (orderForm: OrderForm, newOrderForm: Partial<OrderForm>) => ({
+      ...orderForm,
+      ...newOrderForm,
+    }),
+    OrderFormQuery.orderForm
+  )
 
   const value = useMemo(
     () => ({

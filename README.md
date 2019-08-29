@@ -80,7 +80,7 @@ This flag is set to `true` only when `OrderManager` is loading the order form du
 
 Contains data from the order form. Do not modify this directly, use `setOrderForm` instead.
 
-### `setOrderForm: (newOrderForm: OrderForm) => void`
+### `setOrderForm: (newOrderForm: Partial<OrderForm>) => void`
 
 Updates the order form stored in `OrderManager`. This should be called after each mutation to ensure that client data does not get out of sync with server data and that other `OrderManager` consumers can react to this update.
 

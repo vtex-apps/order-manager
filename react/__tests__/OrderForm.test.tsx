@@ -91,7 +91,7 @@ describe('OrderForm', () => {
 
     const Component: FunctionComponent = () => {
       const { loading, orderForm, setOrderForm } = useOrderForm()
-      if (loading) {
+      if (loading || ! orderForm) {
         return <div>Loading</div>
       }
       const handleClick = () => {
@@ -99,7 +99,7 @@ describe('OrderForm', () => {
           ...orderForm.items[1],
           name: 'Mirai zura!',
         }
-        setOrderForm(orderForm && { ...orderForm, items: [newItem] })
+        setOrderForm({ items: [newItem] })
       }
       return (
         <div>
