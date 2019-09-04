@@ -9,7 +9,7 @@ import React, {
 import { branch, renderComponent } from 'recompose'
 import { compose, graphql } from 'react-apollo'
 
-import OrderFormQuery from './graphql/orderForm.graphql'
+import { orderForm as OrderFormQuery } from 'vtex.checkout-resources/Queries'
 
 interface Context {
   loading: boolean
