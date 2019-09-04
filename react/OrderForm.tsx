@@ -14,7 +14,7 @@ import { orderForm as OrderFormQuery } from 'vtex.checkout-resources/Queries'
 interface Context {
   loading: boolean
   orderForm: OrderForm | undefined
-  setOrderForm: (orderForm: OrderForm) => void
+  setOrderForm: (orderForm: Partial<OrderForm>) => void
 }
 
 interface OrderFormProviderProps {

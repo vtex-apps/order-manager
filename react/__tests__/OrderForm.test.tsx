@@ -2,7 +2,7 @@ import React, { FunctionComponent } from 'react'
 import { fireEvent, render } from '@vtex/test-tools/react'
 
 import { mockOrderForm } from '../__mocks__/mockOrderForm'
-import OrderForm from '../graphql/orderForm.graphql'
+import { orderForm as OrderForm } from '../__mocks__/vtex.checkout-resources/Queries'
 import { OrderFormProvider, useOrderForm } from '../OrderForm'
 
 describe('OrderForm', () => {
