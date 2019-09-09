@@ -91,7 +91,7 @@ describe('OrderForm', () => {
 
     const Component: FunctionComponent = () => {
       const { loading, orderForm, setOrderForm } = useOrderForm()
-      if (loading || ! orderForm) {
+      if (loading || !orderForm) {
         return <div>Loading</div>
       }
       const handleClick = () => {

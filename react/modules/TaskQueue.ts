@@ -46,7 +46,7 @@ export class TaskQueue {
     }
 
     const wrappedTask = () => {
-      if (id) {
+      if (id && this.taskIdMap[id]) {
         delete this.taskIdMap[id]
       }
       return task()
