@@ -45,7 +45,14 @@ export class TaskQueue {
       })
     }
 
-    const promise = this.queue.push(task)
+    const wrappedTask = () => {
+      if (id) {
+        delete this.taskIdMap[id]
+      }
+      return task()
+    }
+
+    const promise = this.queue.push(wrappedTask)
 
     if (id) {
       this.taskIdMap[id] = {
