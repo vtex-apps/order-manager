@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.3.2] - 2019-09-10
+
 ### Changed
 
 - A running task is not cancelled anymore when another task with same `id` is pushed to the queue.
