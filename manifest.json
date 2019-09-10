@@ -6,7 +6,8 @@
   "description": "Order Manager",
   "defaultLocale": "pt-BR",
   "builders": {
-    "react": "3.x"
+    "react": "3.x",
+    "docs": "0.x"
   },
   "dependencies": {
     "vtex.checkout-resources": "0.x"
