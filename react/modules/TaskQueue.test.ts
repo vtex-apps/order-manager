@@ -57,6 +57,24 @@ describe('TaskQueue', () => {
     expect(results).toEqual(['1', '3', '4'])
   })
 
+  it('should not cancel a running task if a newer one with same id is pushed to the queue', async () => {
+    const queue = new TaskQueue()
+    const tasks: PromiseLike<any>[] = []
+
+    const innerTask = createScheduledTask(() => 'bar', 5)
+
+    const outerTask = async () => {
+      tasks.push(queue.enqueue(innerTask, 'someId'))
+      await createScheduledTask(() => {}, 10)
+      return 'foo'
+    }
+
+    tasks.push(queue.enqueue(outerTask, 'someId'))
+
+    await expect(tasks[0]).resolves.toEqual('foo')
+    await expect(tasks[1]).resolves.toEqual('bar')
+  })
+
   it('should emit a Fulfilled event only when the queue becomes empty', async () => {
     const queue = new TaskQueue()
     const mockFulfilledCb = jest.fn()
