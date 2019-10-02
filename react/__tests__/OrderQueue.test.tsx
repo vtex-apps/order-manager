@@ -1,7 +1,12 @@
 import React, { FunctionComponent, useEffect } from 'react'
-import { render } from '@vtex/test-tools/react'
+import { act, fireEvent, render } from '@vtex/test-tools/react'
 
-import { OrderQueueProvider, useOrderQueue } from '../OrderQueue'
+import { QueueStatus } from '../constants'
+import {
+  OrderQueueProvider,
+  useOrderQueue,
+  useQueueStatus,
+} from '../OrderQueue'
 
 const createScheduledTask = (task: () => any, time: number) => () =>
   new Promise(resolve => {
@@ -35,7 +40,7 @@ describe('OrderQueue', () => {
         tasks.push(enqueue(createScheduledTask(() => results.push('1'), 10)))
         tasks.push(enqueue(createScheduledTask(() => results.push('2'), 5)))
         tasks.push(enqueue(createScheduledTask(() => results.push('3'), 5)))
-      }, [])
+      }, [enqueue])
       return <div>foo</div>
     }
 
@@ -49,5 +54,39 @@ describe('OrderQueue', () => {
 
     await Promise.all(tasks)
     expect(results).toEqual(['1', '2', '3'])
+  })
+
+  it('should keep the ref returned by useQueueStatus updated', async () => {
+    let queueStatusRef: any = null
+    let task = null
+
+    const Component: FunctionComponent = () => {
+      const { enqueue, listen } = useOrderQueue()
+      queueStatusRef = useQueueStatus(listen)
+
+      const handleClick = () => {
+        task = enqueue(createScheduledTask(() => {}, 10))
+      }
+
+      return <button onClick={handleClick}>enqueue</button>
+    }
+
+    const { getByText } = render(
+      <OrderQueueProvider>
+        <Component />
+      </OrderQueueProvider>
+    )
+
+    expect(queueStatusRef).toBeDefined()
+    expect(queueStatusRef.current).toEqual(QueueStatus.FULFILLED)
+
+    const button = getByText('enqueue')
+    act(() => {
+      fireEvent.click(button)
+    })
+    expect(queueStatusRef.current).toEqual(QueueStatus.PENDING)
+
+    await task
+    expect(queueStatusRef.current).toEqual(QueueStatus.FULFILLED)
   })
 })
