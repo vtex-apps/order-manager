@@ -5,7 +5,7 @@
 ## Usage
 
 ```tsx
-import { OrderQueueProvider, useOrderQueue } from 'vtex.order-manager/OrderQueue'
+import { OrderQueueProvider, useOrderQueue, useQueueStatus } from 'vtex.order-manager/OrderQueue'
 import { OrderFormProvider, useOrderForm } from 'vtex.order-manager/OrderForm'
 
 const MainComponent: FunctionComponent = () => (
@@ -19,13 +19,21 @@ const MainComponent: FunctionComponent = () => (
 const MyComponent: FunctionComponent = () => {
   const { enqueue, listen } = useOrderQueue()
   const { orderForm, setOrderForm } = useOrderForm()
+  const queueStatusRef = useQueueStatus(listen)
+  
   //...
 }
 ```
 
 ## `OrderQueue` API
 
+### `useOrderQueue(): OrderQueueContext`
+
+Exposes the API to interact with the order queue. See the items below for more details.
+
 ### `enqueue(task: () => Promise, id?: string): Promise`
+
+> Returned by `useOrderQueue()`
 
 Add a task to the queue of requests to the Checkout API. `task` will be called when it's the first in the queue.
 
@@ -51,24 +59,67 @@ Returns a promise that resolves when the task is completed.
 
 1. If the user submits a coupon code, the task is scheduled, then changes and type another coupon code, we can avoid making the first request since the second will superseed it.
 
-### `listen(event: QueueEvent, callback: Function): UnsubcribeFunction`
+### `listen(event: QueueStatus, callback: Function): UnsubcribeFunction`
 
-Listen to events of the queue. The possible events are:
+> Returned by `useOrderQueue()`
 
-`type QueueEvent = Pending | Fulfilled`
+Once this function is called, the `callback` function will be called whenever the specified `event` is emitted until the returned function is called.
 
-- **Pending:** Has tasks in the queue
-- **Fulfilled:** Has no tasks in the queue
+An event is emitted whenever the queue changes its status (see [QueueStatus](#QueueStatus)). For instance, if the queue changes from `QueueStatus.FULFILLED` to `QueueStatus.PENDING`, a `QueueStatus.PENDING` event is emitted.
 
-Returns a function to unsubscribe callback from events.
+Returns a function to unsubscribe the callback from the specified event.
 
 #### Use cases
 
-1. Make it possible to add loaders or disable the Checkout button when there are tasks to resolve.
+1. Makes it possible to add loaders or disable the Checkout button when there are tasks to resolve.
+
+### `QueueStatus`
+
+An enum that represents the queue states. The possible values are:
+
+- `QueueStatus.PENDING`: There is a task running and there might be other tasks enqueued.
+- `QueueStatus.FULFILLED`: The queue is empty and no task is being run.
+
+### `useQueueStatus(listen: ListenFunction): React.MutableRefObject<QueueEvent>`
+
+A helper hook that takes the `listen` function returned by `useOrderQueue` and returns a `ref` object whose `.current` property is a string equal to `Pending` or `Fulfilled` indicating the current queue status.
+
+#### Use cases
+
+1. Makes it possible to perform actions conditioned on the queue status.
+
+#### Example
+
+```ts
+const { QueueStatus, useOrderQueue, useQueueStatus } from 'vtex.order-manager/OrderQueue'
+
+const Component: FunctionComponent = () => {
+  const { listen } = useOrderQueue()
+  const queueStatusRef = useQueueStatus(listen)
+
+  const handleClick = () => {
+    if (queueStatusRef.current === QueueStatus.PENDING) {
+      console.log('An action was performed while the queue was busy.')
+    }
+  }
+  
+  // ...
+}
+```
+
+#### Notes
+
+- Keep in mind that mutating the `ref` object does not trigger a re-render of the React component. If you want to display content depending on the queue status, consider using states controlled by queue events instead.
 
 ## `OrderForm` API
 
+### `useOrderForm(): OrderFormContext`
+
+Exposes the API to interact with the order form. See the items below for more details.
+
 ### `loading: boolean`
+
+> Returned by `useOrderForm()`
 
 This flag is set to `true` only when `OrderManager` is loading the order form during render. In order to know whether a task is ongoing, use `listen` instead.
 
@@ -78,14 +129,12 @@ This flag is set to `true` only when `OrderManager` is loading the order form du
 
 ### `orderForm: OrderForm`
 
+> Returned by `useOrderForm()`
+
 Contains data from the order form. Do not modify this directly, use `setOrderForm` instead.
 
 ### `setOrderForm: (newOrderForm: Partial<OrderForm>) => void`
 
+> Returned by `useOrderForm()`
+
 Updates the order form stored in `OrderManager`. This should be called after each mutation to ensure that client data does not get out of sync with server data and that other `OrderManager` consumers can react to this update.
-
-## Internal spec
-
-### `private queue = Promise[]`
-
-Array of requests to be satisfied.
