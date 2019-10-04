@@ -3,15 +3,20 @@ import React, {
   FC,
   ReactNode,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react'
 
-import { QueueEvent, TaskQueue } from './modules/TaskQueue'
+import { QueueStatus } from './constants'
+import { TaskQueue } from './modules/TaskQueue'
+
+type ListenFunction = (event: QueueStatus, callback: () => any) => () => void
 
 interface Context {
   enqueue: (task: () => Promise<any>, id?: string) => PromiseLike<void>
-  listen: (event: QueueEvent, callback: () => any) => () => void
+  listen: ListenFunction
 }
 
 interface OrderQueueProviderProps {
@@ -19,6 +24,28 @@ interface OrderQueueProviderProps {
 }
 
 const OrderQueueContext = createContext<Context | undefined>(undefined)
+
+export const useQueueStatus = (listen: ListenFunction) => {
+  const queueStatus = useRef(QueueStatus.FULFILLED)
+
+  useEffect(() => {
+    const unlisten = listen(
+      QueueStatus.PENDING,
+      () => (queueStatus.current = QueueStatus.PENDING)
+    )
+    return unlisten
+  }, [listen])
+
+  useEffect(() => {
+    const unlisten = listen(
+      QueueStatus.FULFILLED,
+      () => (queueStatus.current = QueueStatus.FULFILLED)
+    )
+    return unlisten
+  }, [listen])
+
+  return queueStatus
+}
 
 export const OrderQueueProvider: FC<OrderQueueProviderProps> = ({
   children,
@@ -49,4 +76,9 @@ export const useOrderQueue = () => {
   return context
 }
 
-export default { OrderQueueProvider, useOrderQueue }
+export default {
+  OrderQueueProvider,
+  QueueStatus,
+  useOrderQueue,
+  useQueueStatus,
+}

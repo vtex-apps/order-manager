@@ -3,11 +3,11 @@ import {
   SequentialTaskQueue,
 } from 'sequential-task-queue'
 
+import { QueueStatus } from '../constants'
+
 export const TASK_CANCELLED_CODE = 'TASK_CANCELLED'
 export const TASK_CANCELLED_MSG =
   'A more recent task with same id has been pushed to the queue.'
-
-export type QueueEvent = 'Pending' | 'Fulfilled'
 
 interface EnqueuedTask {
   task: () => Promise<any>
@@ -17,7 +17,7 @@ interface EnqueuedTask {
 export class TaskQueue {
   private queue: SequentialTaskQueue
   private taskIdMap: Record<string, EnqueuedTask>
-  private listeners: Record<QueueEvent, (() => any)[]>
+  private listeners: Record<QueueStatus, (() => any)[]>
   private isEmpty: boolean
 
   public constructor() {
@@ -28,14 +28,14 @@ export class TaskQueue {
 
     this.queue.on('drained', () => {
       this.isEmpty = true
-      this.emit('Fulfilled')
+      this.emit(QueueStatus.FULFILLED)
     })
   }
 
   public enqueue(task: () => Promise<any>, id?: string) {
     if (this.isEmpty) {
       this.isEmpty = false
-      this.emit('Pending')
+      this.emit(QueueStatus.PENDING)
     }
 
     if (id && this.taskIdMap[id]) {
@@ -64,7 +64,7 @@ export class TaskQueue {
     return promise
   }
 
-  public listen(event: QueueEvent, cb: () => any) {
+  public listen(event: QueueStatus, cb: () => any) {
     if (!this.listeners[event]) {
       this.listeners[event] = []
     }
@@ -81,7 +81,7 @@ export class TaskQueue {
     return unlisten
   }
 
-  private emit(event: QueueEvent) {
+  private emit(event: QueueStatus) {
     if (this.listeners[event]) {
       this.listeners[event].forEach(cb => cb())
     }
