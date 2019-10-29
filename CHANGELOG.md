@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `dummyOrderForm` file in order to display `product-list` preview skeleton.
+
 ## [0.4.0] - 2019-10-04
 
 ### Added
