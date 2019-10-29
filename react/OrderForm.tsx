@@ -11,6 +11,8 @@ import { compose, graphql } from 'react-apollo'
 
 import { orderForm as OrderFormQuery } from 'vtex.checkout-resources/Queries'
 
+import { dummyOrderForm } from './utils/dummyOrderForm'
+
 interface Context {
   loading: boolean
   orderForm: OrderForm | undefined
@@ -28,7 +30,7 @@ const LoadingState: FunctionComponent = ({ children }: any) => {
   const value = useMemo(
     () => ({
       loading: true,
-      orderForm: undefined,
+      orderForm: dummyOrderForm,
       setOrderForm: () => {},
     }),
     []
