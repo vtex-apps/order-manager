@@ -17,6 +17,7 @@ type ListenFunction = (event: QueueStatus, callback: () => any) => () => void
 interface Context {
   enqueue: (task: () => Promise<any>, id?: string) => PromiseLike<void>
   listen: ListenFunction
+  isWaiting: (id: string) => boolean
 }
 
 interface OrderQueueProviderProps {
@@ -56,6 +57,7 @@ export const OrderQueueProvider: FC<OrderQueueProviderProps> = ({
     () => ({
       enqueue: queue.enqueue.bind(queue),
       listen: queue.listen.bind(queue),
+      isWaiting: queue.isWaiting.bind(queue),
     }),
     [queue]
   )
