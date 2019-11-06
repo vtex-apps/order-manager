@@ -1,4 +1,5 @@
-import { TaskQueue, TASK_CANCELLED_CODE, TASK_CANCELLED_MSG } from './TaskQueue'
+import { TaskQueue, TASK_CANCELLED_CODE } from './TaskQueue'
+import { QueueStatus } from '../constants'
 
 const createScheduledTask = (task: () => any, time: number) => () =>
   new Promise(resolve => {
@@ -49,7 +50,6 @@ describe('TaskQueue', () => {
 
     expect(task2).rejects.toEqual({
       code: TASK_CANCELLED_CODE,
-      message: TASK_CANCELLED_MSG,
     })
 
     await Promise.all([task1, task3, task4])
@@ -78,7 +78,7 @@ describe('TaskQueue', () => {
   it('should emit a Fulfilled event only when the queue becomes empty', async () => {
     const queue = new TaskQueue()
     const mockFulfilledCb = jest.fn()
-    queue.listen('Fulfilled', mockFulfilledCb)
+    queue.listen(QueueStatus.FULFILLED, mockFulfilledCb)
 
     const task1 = queue.enqueue(createScheduledTask(() => {}, 5))
     const task2 = queue.enqueue(createScheduledTask(() => {}, 5))
@@ -96,7 +96,7 @@ describe('TaskQueue', () => {
   it('should emit a Pending event only when the queue is free and receives a task', async () => {
     const queue = new TaskQueue()
     const mockPendingCb = jest.fn()
-    queue.listen('Pending', mockPendingCb)
+    queue.listen(QueueStatus.PENDING, mockPendingCb)
 
     expect(mockPendingCb).toHaveBeenCalledTimes(0)
     const task1 = queue.enqueue(createScheduledTask(() => {}, 5))
@@ -117,7 +117,7 @@ describe('TaskQueue', () => {
   it('should not call listener callback after unlisten is called', async () => {
     const queue = new TaskQueue()
     const mockPendingCb = jest.fn()
-    const unlisten = queue.listen('Pending', mockPendingCb)
+    const unlisten = queue.listen(QueueStatus.PENDING, mockPendingCb)
 
     const task = queue.enqueue(async () => {})
     expect(mockPendingCb).toHaveBeenCalledTimes(1)
@@ -131,9 +131,9 @@ describe('TaskQueue', () => {
   it('should remove a single listener callback when unlisten is called', async () => {
     const queue = new TaskQueue()
     const mockPendingCb = jest.fn()
-    queue.listen('Pending', mockPendingCb)
-    const unlisten = queue.listen('Pending', mockPendingCb)
-    queue.listen('Pending', mockPendingCb)
+    queue.listen(QueueStatus.PENDING, mockPendingCb)
+    const unlisten = queue.listen(QueueStatus.PENDING, mockPendingCb)
+    queue.listen(QueueStatus.PENDING, mockPendingCb)
 
     const task = queue.enqueue(async () => {})
     expect(mockPendingCb).toHaveBeenCalledTimes(3)
@@ -142,5 +142,21 @@ describe('TaskQueue', () => {
     unlisten()
     queue.enqueue(async () => {})
     expect(mockPendingCb).toHaveBeenCalledTimes(5)
+  })
+
+  it('should return correct values when isWaiting is called', async () => {
+    const queue = new TaskQueue()
+    queue.enqueue(createScheduledTask(() => {}, 20))
+    const secondTaskStarts = new Promise((resolve: any) => queue.enqueue(
+      async () => {
+        resolve()
+        await createScheduledTask(() => {}, 5)
+      },
+      'TaskID'
+    ))
+
+    expect(queue.isWaiting('TaskID')).toEqual(true)
+    await secondTaskStarts
+    expect(queue.isWaiting('TaskID')).toEqual(false)
   })
 })

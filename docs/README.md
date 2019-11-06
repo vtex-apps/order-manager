@@ -31,7 +31,7 @@ const MyComponent: FunctionComponent = () => {
 
 Exposes the API to interact with the order queue. See the items below for more details.
 
-### `enqueue(task: () => Promise, id?: string): Promise`
+### `enqueue(task: () => Promise, id?: string): CancellablePromise`
 
 > Returned by `useOrderQueue()`
 
@@ -53,7 +53,7 @@ enqueue(taskB, "coupon");
 
 The point of this feature is to avoid making requests that are stale.
 
-Returns a promise that resolves when the task is completed.
+Returns a promise that resolves when the task is completed. This promise has a method `.cancel()`. If this function is called, the queue will ignore this task if it hasn't started yet and the promise will immediately reject, returning an object with a property `code` with value `'TASK_CANCELLED'`.
 
 #### Use cases
 
@@ -72,6 +72,16 @@ Returns a function to unsubscribe the callback from the specified event.
 #### Use cases
 
 1. Makes it possible to add loaders or disable the Checkout button when there are tasks to resolve.
+
+### `isWaiting(id: string): boolean`
+
+> Returned by `useOrderQueue()`
+
+Returns `true` if there is a task in the queue with the specified `id` that hasn't been run yet, or `false` otherwise.
+
+#### Use cases
+
+1. If you want to enqueue a task but a similar one is already in the queue, you can use this function to determine whether the older one has already been run. In case it hasn't, you can cancel it, merge both tasks and enqueue the merged task.
 
 ### `QueueStatus`
 

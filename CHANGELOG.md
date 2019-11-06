@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- Function `isWaiting` to determine whether a task with the specified `id` is still in the queue.
+
 ## [0.5.0] - 2019-10-29
 
 ### Added

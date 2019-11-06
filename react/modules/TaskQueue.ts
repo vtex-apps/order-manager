@@ -6,8 +6,6 @@ import {
 import { QueueStatus } from '../constants'
 
 export const TASK_CANCELLED_CODE = 'TASK_CANCELLED'
-export const TASK_CANCELLED_MSG =
-  'A more recent task with same id has been pushed to the queue.'
 
 interface EnqueuedTask {
   task: () => Promise<any>
@@ -32,6 +30,10 @@ export class TaskQueue {
     })
   }
 
+  public isWaiting(id: string) {
+    return !!this.taskIdMap[id]
+  }
+
   public enqueue(task: () => Promise<any>, id?: string) {
     if (this.isEmpty) {
       this.isEmpty = false
@@ -39,10 +41,7 @@ export class TaskQueue {
     }
 
     if (id && this.taskIdMap[id]) {
-      this.taskIdMap[id].promise.cancel({
-        code: TASK_CANCELLED_CODE,
-        message: TASK_CANCELLED_MSG,
-      })
+      this.taskIdMap[id].promise.cancel()
     }
 
     const wrappedTask = () => {
@@ -53,6 +52,10 @@ export class TaskQueue {
     }
 
     const promise = this.queue.push(wrappedTask)
+    const cancelPromise = promise.cancel
+    promise.cancel = () => cancelPromise({
+      code: TASK_CANCELLED_CODE,
+    })
 
     if (id) {
       this.taskIdMap[id] = {
