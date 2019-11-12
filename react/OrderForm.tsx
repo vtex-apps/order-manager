@@ -21,7 +21,9 @@ interface Context {
 const OrderFormContext = createContext<Context | undefined>(undefined)
 
 export const OrderFormProvider: FC = ({ children }) => {
-  const { loading, data } = useQuery<{ orderForm: OrderForm }>(OrderFormQuery)
+  const { loading, data } = useQuery<{ orderForm: OrderForm }>(OrderFormQuery, {
+    ssr: false,
+  })
 
   const [orderForm, setOrderForm] = useReducer(
     (orderForm: OrderForm, newOrderForm: Partial<OrderForm>) => ({
@@ -40,11 +42,11 @@ export const OrderFormProvider: FC = ({ children }) => {
 
   const value = useMemo(
     () => ({
-      loading: false,
+      loading,
       orderForm,
       setOrderForm,
     }),
-    [orderForm]
+    [loading, orderForm]
   )
 
   return (

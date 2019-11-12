@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- `loading` attribute would not be updated on `OrderFormContext`.
+- `orderForm` query being executed during SSR.
+
 ## [0.6.1] - 2019-11-12
 
 ### Fixed
