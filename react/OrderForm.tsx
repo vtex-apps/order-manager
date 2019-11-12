@@ -1,13 +1,12 @@
 import React, {
   createContext,
-  FunctionComponent,
-  ReactNode,
   useContext,
   useMemo,
   useReducer,
+  useEffect,
+  FC,
 } from 'react'
-import { branch, renderComponent } from 'recompose'
-import { compose, graphql } from 'react-apollo'
+import { useQuery } from 'react-apollo'
 
 import { orderForm as OrderFormQuery } from 'vtex.checkout-resources/Queries'
 
@@ -19,44 +18,25 @@ interface Context {
   setOrderForm: (orderForm: Partial<OrderForm>) => void
 }
 
-interface OrderFormProviderProps {
-  children: ReactNode
-  OrderFormQuery: any
-}
-
 const OrderFormContext = createContext<Context | undefined>(undefined)
 
-const LoadingState: FunctionComponent = ({ children }: any) => {
-  const value = useMemo(
-    () => ({
-      loading: true,
-      orderForm: dummyOrderForm,
-      setOrderForm: () => {},
-    }),
-    []
-  )
+export const OrderFormProvider: FC = ({ children }) => {
+  const { loading, data } = useQuery<{ orderForm: OrderForm }>(OrderFormQuery)
 
-  return (
-    <OrderFormContext.Provider value={value}>
-      {children}
-    </OrderFormContext.Provider>
-  )
-}
-
-export const OrderFormProvider = compose(
-  graphql(OrderFormQuery, { name: 'OrderFormQuery', options: { ssr: false } }),
-  branch(
-    ({ OrderFormQuery }: any) => !!OrderFormQuery.loading,
-    renderComponent(LoadingState)
-  )
-)(({ children, OrderFormQuery }: OrderFormProviderProps) => {
   const [orderForm, setOrderForm] = useReducer(
     (orderForm: OrderForm, newOrderForm: Partial<OrderForm>) => ({
       ...orderForm,
       ...newOrderForm,
     }),
-    OrderFormQuery.orderForm
+    dummyOrderForm
   )
+
+  useEffect(() => {
+    if (loading) {
+      return
+    }
+    data && setOrderForm(data.orderForm)
+  }, [data, loading])
 
   const value = useMemo(
     () => ({
@@ -72,7 +52,7 @@ export const OrderFormProvider = compose(
       {children}
     </OrderFormContext.Provider>
   )
-})
+}
 
 export const useOrderForm = () => {
   const context = useContext(OrderFormContext)
