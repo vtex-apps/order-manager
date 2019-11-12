@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.6.1] - 2019-11-12
+
 ### Fixed
 
 - A new component tree would be mounted after the `orderForm` query was completed.
