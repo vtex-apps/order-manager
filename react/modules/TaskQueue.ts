@@ -1,7 +1,7 @@
 import {
   CancellablePromiseLike,
   SequentialTaskQueue,
-} from 'sequential-task-queue'
+} from './SequentialTaskQueue'
 
 import { QueueStatus } from '../constants'
 

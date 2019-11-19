@@ -4822,11 +4822,6 @@ semver@^6.0.0, semver@^6.3.0:
   resolved "https://registry.yarnpkg.com/semver/-/semver-6.3.0.tgz#ee0a64c8af5e8ceea67687b133761e1becbd1d3d"
   integrity sha512-b39TBaTSfV6yBrapU89p5fKekE2m/NwnDocOVruQFS1/veMgdzuPcnOM34M6CwxW8jH/lxEa5rBoDeUwu5HHTw==
 
-sequential-task-queue@^1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/sequential-task-queue/-/sequential-task-queue-1.2.1.tgz#eec0ef3c616c8f99b14eb6620ff7beef418984a4"
-  integrity sha512-w2g0QgV37MSsI/qnvn8Z3NUGNilQA6p+NfujkSWI99rvBu/eTx3E0Z1rTIzaRxQj+gT9+Mta2azxyefnw0C25Q==
-
 set-blocking@^2.0.0, set-blocking@~2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/set-blocking/-/set-blocking-2.0.0.tgz#045f9782d011ae9a6803ddd382b24392b3d890f7"
