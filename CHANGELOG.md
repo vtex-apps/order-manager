@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.6.3] - 2019-11-19
+
 ### Fixed
 
 - This app was breaking in IE11 due to a module not exporting code compatible with it.
