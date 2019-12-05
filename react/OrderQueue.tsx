@@ -19,7 +19,7 @@ interface Context {
   enqueue: (
     task: () => Promise<any>,
     id?: string
-  ) => CancellablePromiseLike<void>
+  ) => CancellablePromiseLike<any>
   listen: ListenFunction
   isWaiting: (id: string) => boolean
 }
