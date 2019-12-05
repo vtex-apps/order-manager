@@ -11,11 +11,15 @@ import React, {
 
 import { QueueStatus } from './constants'
 import { TaskQueue } from './modules/TaskQueue'
+import { CancellablePromiseLike } from './modules/SequentialTaskQueue'
 
 type ListenFunction = (event: QueueStatus, callback: () => any) => () => void
 
 interface Context {
-  enqueue: (task: () => Promise<any>, id?: string) => PromiseLike<void>
+  enqueue: (
+    task: () => Promise<any>,
+    id?: string
+  ) => CancellablePromiseLike<void>
   listen: ListenFunction
   isWaiting: (id: string) => boolean
 }
