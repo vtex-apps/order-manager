@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- Typings of `OrderQueue` context to have a `CancellablePromiseLike` return
+  value for the `enqueue` function.
+
 ## [0.6.3] - 2019-11-19
 
 ### Fixed
