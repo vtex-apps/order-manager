@@ -16,10 +16,10 @@ import { CancellablePromiseLike } from './modules/SequentialTaskQueue'
 type ListenFunction = (event: QueueStatus, callback: () => any) => () => void
 
 interface Context {
-  enqueue: (
-    task: () => Promise<any>,
+  enqueue: <T extends any>(
+    task: () => Promise<T>,
     id?: string
-  ) => CancellablePromiseLike<any>
+  ) => CancellablePromiseLike<T>
   listen: ListenFunction
   isWaiting: (id: string) => boolean
 }
