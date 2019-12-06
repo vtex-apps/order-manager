@@ -141,10 +141,16 @@ This flag is set to `true` only when `OrderManager` is loading the order form du
 
 > Returned by `useOrderForm()`
 
-Contains data from the order form. Do not modify this directly, use `setOrderForm` instead.
+Contains data from the order form. Do not modify this directly, use `setOrderForm` instead. In case the order form query fails, an empty order form is returned instead (see [`error`](#error-apolloerror--undefined)).
 
 ### `setOrderForm: (newOrderForm: Partial<OrderForm>) => void`
 
 > Returned by `useOrderForm()`
 
 Updates the order form stored in `OrderManager`. This should be called after each mutation to ensure that client data does not get out of sync with server data and that other `OrderManager` consumers can react to this update.
+
+### `error: ApolloError | undefined`
+
+> Returned by `useOrderForm()`
+
+A reference to the `error` object returned by the GraphQL query for the order form.
