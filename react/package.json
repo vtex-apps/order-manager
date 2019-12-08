@@ -24,7 +24,7 @@
     "@types/react": "^16.8.10",
     "@types/react-intl": "^2.3.17",
     "@types/recompose": "^0.30.7",
-    "@vtex/test-tools": "^1.1.0",
+    "@vtex/test-tools": "^2.1.1",
     "apollo-client": "^2.5.1",
     "eslint": "^5.16.0",
     "eslint-config-vtex-react": "^4.1.0",
