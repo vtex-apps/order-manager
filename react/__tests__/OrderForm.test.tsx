@@ -1,11 +1,16 @@
 import React, { FunctionComponent } from 'react'
-import { fireEvent, render } from '@vtex/test-tools/react'
+import { fireEvent, render, wait } from '@vtex/test-tools/react'
+import { MockedProvider } from '@apollo/react-testing'
 
 import { mockOrderForm } from '../__mocks__/mockOrderForm'
 import { orderForm as OrderForm } from '../__mocks__/vtex.checkout-resources/Queries'
 import { OrderFormProvider, useOrderForm } from '../OrderForm'
 
 describe('OrderForm', () => {
+  beforeEach(() => {
+    jest.useFakeTimers()
+  })
+
   it('should throw when useOrderForm is called outside a OrderFormProvider', () => {
     const oldConsoleError = console.error
     console.error = () => {}
@@ -22,7 +27,7 @@ describe('OrderForm', () => {
     console.error = oldConsoleError
   })
 
-  it('should set loading=true when fetching the order form', () => {
+  it('should set loading=true when fetching the order form', async () => {
     const Component: FunctionComponent = () => {
       const { loading } = useOrderForm()
       return <div>{loading ? 'Loading' : 'Not loading'}</div>
@@ -35,6 +40,7 @@ describe('OrderForm', () => {
     )
 
     expect(getByText('Loading')).toBeTruthy()
+    await wait(() => jest.runAllTimers())
   })
 
   it('should correctly load the order form', async () => {
@@ -68,10 +74,10 @@ describe('OrderForm', () => {
       <OrderFormProvider>
         <Component />
       </OrderFormProvider>,
-      { graphql: { mocks: [mockQuery] } }
+      { graphql: { mocks: [mockQuery] }, MockedProvider }
     )
 
-    await new Promise(resolve => setTimeout(() => resolve())) // waits for query
+    await wait(() => jest.runAllTimers())
     expect(getByText(mockOrderForm.items[0].name)).toBeTruthy()
     expect(getByText(mockOrderForm.items[1].name)).toBeTruthy()
     expect(getByText(mockOrderForm.items[2].name)).toBeTruthy()
@@ -118,12 +124,14 @@ describe('OrderForm', () => {
       <OrderFormProvider>
         <Component />
       </OrderFormProvider>,
-      { graphql: { mocks: [mockQuery] } }
+      { graphql: { mocks: [mockQuery] }, MockedProvider }
     )
 
-    await new Promise(resolve => setTimeout(() => resolve())) // waits for query
-    const button = getByText('update')
-    fireEvent.click(button)
+    await wait(() => {
+      jest.runAllTimers()
+      const button = getByText('update')
+      fireEvent.click(button)
+    })
     expect(getByText('Mirai zura!')).toBeTruthy()
   })
 })
