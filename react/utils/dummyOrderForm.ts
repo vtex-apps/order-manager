@@ -1,8 +1,8 @@
-const dummyItem = {
+const dummyItem = (id: string) => ({
   additionalInfo: {
     brandName: '',
   },
-  id: '',
+  id: id,
   detailUrl: '',
   imageUrl: '',
   listPrice: 0,
@@ -15,10 +15,10 @@ const dummyItem = {
   skuName: '',
   skuSpecifications: [],
   availability: 'available',
-}
+})
 
 export const dummyOrderForm = {
-  items: [dummyItem, dummyItem],
+  items: [dummyItem('1'), dummyItem('2')],
   shipping: {
     countries: [],
     deliveryOptions: [
