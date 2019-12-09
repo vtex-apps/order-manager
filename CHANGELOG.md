@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.6.4] - 2019-12-09
+
 ### Fixed
 
 - Typings of `OrderQueue` context to have a `CancellablePromiseLike` return
