@@ -53,9 +53,10 @@ export class TaskQueue {
 
     const promise = this.queue.push(wrappedTask)
     const cancelPromise = promise.cancel
-    promise.cancel = () => cancelPromise({
-      code: TASK_CANCELLED_CODE,
-    })
+    promise.cancel = () =>
+      cancelPromise({
+        code: TASK_CANCELLED_CODE,
+      })
 
     if (id) {
       this.taskIdMap[id] = {
