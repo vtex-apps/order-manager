@@ -48,3 +48,31 @@ export const dummyOrderForm = {
   totalizers: [{ id: '', value: 0, name: '' }],
   value: 0,
 }
+
+export const emptyOrderForm = {
+  items: [],
+  shipping: {
+    countries: [],
+    deliveryOptions: [],
+    selectedAddress: {
+      addressId: '',
+      addressType: '',
+      city: '',
+      complement: '',
+      country: '',
+      neighborhood: '',
+      number: '',
+      postalCode: '',
+      receiverName: '',
+      reference: '',
+      state: '',
+      street: '',
+      geoCoordinates: [],
+    },
+  },
+  marketingData: {
+    coupon: '',
+  },
+  totalizers: [{ id: '', value: 0, name: '' }],
+  value: 0,
+}

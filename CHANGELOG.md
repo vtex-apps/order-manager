@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `error` property returned by the order form GraphQL query to the `OrderFormContext`.
+- Log to Splunk when the order form query fails.
+
 ## [0.6.5] - 2019-12-09
 
 ### Fixed
