@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- `loading` property from the `OrderFormContext` being set to `false` before the order form was updated with the proper values.
+
 ## [0.6.6] - 2019-12-13
 
 ### Added

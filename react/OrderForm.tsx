@@ -4,6 +4,7 @@ import React, {
   useMemo,
   useReducer,
   useEffect,
+  useState,
   FC,
 } from 'react'
 import { ApolloError, useQuery } from 'react-apollo'
@@ -23,12 +24,11 @@ interface Context {
 const OrderFormContext = createContext<Context | undefined>(undefined)
 
 export const OrderFormProvider: FC = ({ children }) => {
-  const { loading, data, error } = useQuery<{ orderForm: OrderForm }>(
-    OrderFormQuery,
-    {
-      ssr: false,
-    }
-  )
+  const { loading: loadingQuery, data, error } = useQuery<{
+    orderForm: OrderForm
+  }>(OrderFormQuery, {
+    ssr: false,
+  })
 
   const [orderForm, setOrderForm] = useReducer(
     (orderForm: OrderForm, newOrderForm: Partial<OrderForm>) => ({
@@ -37,6 +37,8 @@ export const OrderFormProvider: FC = ({ children }) => {
     }),
     dummyOrderForm
   )
+
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (error) {
@@ -52,12 +54,13 @@ export const OrderFormProvider: FC = ({ children }) => {
       console.error(error.message)
     }
 
-    if (loading) {
+    if (loadingQuery) {
       return
     }
 
+    setLoading(false)
     data && setOrderForm(data.orderForm)
-  }, [data, error, loading])
+  }, [data, error, loadingQuery])
 
   const value = useMemo(
     () => ({
