@@ -28,6 +28,7 @@ export const OrderFormProvider: FC = ({ children }) => {
     orderForm: OrderForm
   }>(OrderFormQuery, {
     ssr: false,
+    fetchPolicy: 'network-only',
   })
 
   const [orderForm, setOrderForm] = useReducer(
