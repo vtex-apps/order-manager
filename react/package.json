@@ -37,5 +37,5 @@
     "vtex.checkout-resources": "http://vtex.vteximg.com.br/_v/public/typings/v1/vtex.checkout-resources@0.13.0/public/_types/react",
     "vtex.render-runtime": "http://vtex.vteximg.com.br/_v/public/typings/v1/vtex.render-runtime@8.82.0/public/@types/vtex.render-runtime"
   },
-  "version": "0.6.7"
+  "version": "0.6.8"
 }
