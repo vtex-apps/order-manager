@@ -7,7 +7,8 @@ import React, {
   useState,
   FC,
 } from 'react'
-import { ApolloError, useQuery } from 'react-apollo'
+import { ApolloClient, ApolloError } from 'apollo-client'
+import { useQuery } from 'react-apollo'
 
 import { orderForm as OrderFormQuery } from 'vtex.checkout-resources/Queries'
 
@@ -23,12 +24,22 @@ interface Context {
 
 const OrderFormContext = createContext<Context | undefined>(undefined)
 
+const updateApolloCache = (client: ApolloClient<any>, orderForm: OrderForm) => {
+  const data = client.readQuery({ query: OrderFormQuery })
+  client.writeQuery({
+    query: OrderFormQuery,
+    data: {
+      ...data,
+      orderForm,
+    },
+  })
+}
+
 export const OrderFormProvider: FC = ({ children }) => {
-  const { loading: loadingQuery, data, error } = useQuery<{
+  const { client, loading: loadingQuery, data, error } = useQuery<{
     orderForm: OrderForm
   }>(OrderFormQuery, {
     ssr: false,
-    fetchPolicy: 'network-only',
   })
 
   const [orderForm, setOrderForm] = useReducer(
@@ -60,17 +71,24 @@ export const OrderFormProvider: FC = ({ children }) => {
     }
 
     setLoading(false)
-    data && setOrderForm(data.orderForm)
-  }, [data, error, loadingQuery])
+
+    if (data) {
+      setOrderForm(data.orderForm)
+      updateApolloCache(client, data.orderForm)
+    }
+  }, [client, data, error, loadingQuery])
 
   const value = useMemo(
     () => ({
       error,
       loading,
       orderForm: error ? emptyOrderForm : orderForm,
-      setOrderForm,
+      setOrderForm: (newOrderForm: Partial<OrderForm>) => {
+        updateApolloCache(client, { ...orderForm, ...newOrderForm })
+        setOrderForm(newOrderForm)
+      },
     }),
-    [error, loading, orderForm]
+    [client, error, loading, orderForm]
   )
   return (
     <OrderFormContext.Provider value={value}>
