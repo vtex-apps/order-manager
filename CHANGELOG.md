@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- Cache to `OrderForm` query in Apollo.
+
+### Fixed
+
+- OrderForm data in Apollo's cache is now updated when the local OrderForm is modified.
+
 ## [0.6.8] - 2019-12-27
 
 ### Removed
