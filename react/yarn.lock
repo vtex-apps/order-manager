@@ -5764,13 +5764,17 @@ verror@1.10.0:
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
 
-"vtex.checkout-resources@http://vtex.vteximg.com.br/_v/public/typings/v1/vtex.checkout-resources@0.13.0/public/_types/react":
-  version "0.0.0"
-  resolved "http://vtex.vteximg.com.br/_v/public/typings/v1/vtex.checkout-resources@0.13.0/public/_types/react#fa7a0347e046eab3dd768998fc9252b2c0dd5aef"
+"vtex.checkout-graphql@http://vtex.vteximg.com.br/_v/public/typings/v1/vtex.checkout-graphql@0.20.1/public/@types/vtex.checkout-graphql":
+  version "0.20.1"
+  resolved "http://vtex.vteximg.com.br/_v/public/typings/v1/vtex.checkout-graphql@0.20.1/public/@types/vtex.checkout-graphql#ce2e4a6db6f1524ad4f0986fd10352fd8d2c29f4"
 
-"vtex.render-runtime@http://vtex.vteximg.com.br/_v/public/typings/v1/vtex.render-runtime@8.82.0/public/@types/vtex.render-runtime":
-  version "8.82.0"
-  resolved "http://vtex.vteximg.com.br/_v/public/typings/v1/vtex.render-runtime@8.82.0/public/@types/vtex.render-runtime#55c3bdec010133488255d3e679713cf3290369e4"
+"vtex.checkout-resources@http://vtex.vteximg.com.br/_v/public/typings/v1/vtex.checkout-resources@0.14.2/public/@types/vtex.checkout-resources":
+  version "0.14.2"
+  resolved "http://vtex.vteximg.com.br/_v/public/typings/v1/vtex.checkout-resources@0.14.2/public/@types/vtex.checkout-resources#9446681270d42d068c42d94b555c16e9b96ef6ce"
+
+"vtex.render-runtime@http://vtex.vteximg.com.br/_v/public/typings/v1/vtex.render-runtime@8.88.0/public/@types/vtex.render-runtime":
+  version "8.88.0"
+  resolved "http://vtex.vteximg.com.br/_v/public/typings/v1/vtex.render-runtime@8.88.0/public/@types/vtex.render-runtime#0257088b54c76eec74477e5dd9014d5b38779ac7"
 
 w3c-hr-time@^1.0.1:
   version "1.0.1"
