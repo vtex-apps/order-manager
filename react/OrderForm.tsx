@@ -10,10 +10,12 @@ import React, {
 import { ApolloClient, ApolloError } from 'apollo-client'
 import { useQuery } from 'react-apollo'
 
-import { orderForm as OrderFormQuery } from 'vtex.checkout-resources/Queries'
+import { Queries } from 'vtex.checkout-resources'
 
 import { dummyOrderForm, emptyOrderForm } from './utils/dummyOrderForm'
 import { logSplunk } from './utils/logger'
+
+const { orderForm: OrderFormQuery } = Queries
 
 interface Context {
   loading: boolean
