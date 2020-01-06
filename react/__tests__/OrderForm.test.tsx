@@ -1,10 +1,13 @@
 import React, { FunctionComponent } from 'react'
 import { fireEvent, render, wait } from '@vtex/test-tools/react'
 import { MockedProvider } from '@apollo/react-testing'
+import { Item } from 'vtex.checkout-graphql'
 
 import { mockOrderForm } from '../__mocks__/mockOrderForm'
-import { orderForm as OrderForm } from '../__mocks__/vtex.checkout-resources/Queries'
+import { Queries } from '../__mocks__/vtex.checkout-resources'
 import { OrderFormProvider, useOrderForm } from '../OrderForm'
+
+const { orderForm: OrderForm } = Queries
 
 describe('OrderForm', () => {
   beforeEach(() => {

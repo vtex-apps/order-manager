@@ -10,6 +10,7 @@ import React, {
 import { ApolloClient, ApolloError } from 'apollo-client'
 import { useQuery } from 'react-apollo'
 import { Queries } from 'vtex.checkout-resources'
+import { OrderForm } from 'vtex.checkout-graphql'
 
 import { dummyOrderForm, emptyOrderForm } from './utils/dummyOrderForm'
 import { logSplunk } from './utils/logger'

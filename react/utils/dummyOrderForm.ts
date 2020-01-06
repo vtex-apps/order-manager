@@ -1,10 +1,12 @@
-const dummyItem = (id: string) => ({
+import { Item, OrderForm } from 'vtex.checkout-graphql'
+
+const dummyItem = (id: string): Item => ({
   additionalInfo: {
     brandName: '',
   },
   id: id,
   detailUrl: '',
-  imageUrl: '',
+  imageUrls: null,
   listPrice: 0,
   measurementUnit: '',
   name: '',
@@ -14,41 +16,9 @@ const dummyItem = (id: string) => ({
   sellingPrice: 0,
   skuName: '',
   skuSpecifications: [],
+  uniqueId: id,
   availability: 'available',
 })
-
-export const dummyOrderForm = {
-  id: '',
-  items: [dummyItem('1'), dummyItem('2')],
-  shipping: {
-    countries: [],
-    deliveryOptions: [
-      { id: '', price: 0, estimate: '', isSelected: false },
-      { id: '', price: 0, estimate: '', isSelected: false },
-      { id: '', price: 0, estimate: '', isSelected: false },
-    ],
-    selectedAddress: {
-      addressId: '',
-      addressType: '',
-      city: '',
-      complement: '',
-      country: '',
-      neighborhood: '',
-      number: '',
-      postalCode: '',
-      receiverName: '',
-      reference: '',
-      state: '',
-      street: '',
-      geoCoordinates: [],
-    },
-  },
-  marketingData: {
-    coupon: '',
-  },
-  totalizers: [{ id: '', value: 0, name: '' }],
-  value: 0,
-}
 
 export const emptyOrderForm = {
   id: '',
@@ -58,7 +28,7 @@ export const emptyOrderForm = {
     deliveryOptions: [],
     selectedAddress: {
       addressId: '',
-      addressType: '',
+      addressType: null,
       city: '',
       complement: '',
       country: '',
@@ -75,6 +45,15 @@ export const emptyOrderForm = {
   marketingData: {
     coupon: '',
   },
+  messages: {
+    couponMessages: [],
+    generalMessages: [],
+  },
   totalizers: [{ id: '', value: 0, name: '' }],
   value: 0,
+}
+
+export const dummyOrderForm: OrderForm = {
+  ...emptyOrderForm,
+  items: [dummyItem('id1'), dummyItem('id2')],
 }
