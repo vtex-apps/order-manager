@@ -9,6 +9,17 @@ import { OrderFormProvider, useOrderForm } from '../OrderForm'
 
 const { orderForm: OrderForm } = Queries
 
+const mockQuery = {
+  request: {
+    query: OrderForm,
+  },
+  result: {
+    data: {
+      orderForm: mockOrderForm,
+    },
+  },
+}
+
 describe('OrderForm', () => {
   beforeEach(() => {
     jest.useFakeTimers()
@@ -23,9 +34,12 @@ describe('OrderForm', () => {
       return <div>foo</div>
     }
 
-    expect(() => render(<Component />)).toThrow(
-      'useOrderForm must be used within a OrderFormProvider'
-    )
+    expect(() =>
+      render(<Component />, {
+        graphql: { mocks: [mockQuery] },
+        MockedProvider,
+      })
+    ).toThrow('useOrderForm must be used within a OrderFormProvider')
 
     console.error = oldConsoleError
   })
@@ -39,7 +53,8 @@ describe('OrderForm', () => {
     const { getByText } = render(
       <OrderFormProvider>
         <Component />
-      </OrderFormProvider>
+      </OrderFormProvider>,
+      { graphql: { mocks: [mockQuery] }, MockedProvider }
     )
 
     expect(getByText('Loading')).toBeTruthy()
@@ -47,17 +62,6 @@ describe('OrderForm', () => {
   })
 
   it('should correctly load the order form', async () => {
-    const mockQuery = {
-      request: {
-        query: OrderForm,
-      },
-      result: {
-        data: {
-          orderForm: mockOrderForm,
-        },
-      },
-    }
-
     const Component: FunctionComponent = () => {
       const { loading, orderForm } = useOrderForm()
       if (loading) {
@@ -87,17 +91,6 @@ describe('OrderForm', () => {
   })
 
   it('should correctly update the order form', async () => {
-    const mockQuery = {
-      request: {
-        query: OrderForm,
-      },
-      result: {
-        data: {
-          orderForm: mockOrderForm,
-        },
-      },
-    }
-
     const Component: FunctionComponent = () => {
       const { loading, orderForm, setOrderForm } = useOrderForm()
       if (loading || !orderForm) {
