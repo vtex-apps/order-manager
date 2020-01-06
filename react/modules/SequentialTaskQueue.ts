@@ -80,7 +80,7 @@ export interface CancellationToken {
  * to one of these values when cancelling a task for a reason other than the user code calling
  * {@link CancellationToken.cancel}.
  */
-export var cancellationTokenReasons = {
+export const cancellationTokenReasons = {
   /** Used when the task was cancelled in response to a call to {@link SequentialTaskQueue.cancel} */
   cancel: Object.create(null),
   /** Used when the task was cancelled after its timeout has passed */
@@ -90,7 +90,7 @@ export var cancellationTokenReasons = {
 /**
  * Standard event names used by {@link SequentialTaskQueue}
  */
-export var sequentialTaskQueueEvents = {
+export const sequentialTaskQueueEvents = {
   drained: 'drained',
   error: 'error',
   timeout: 'timeout',
@@ -107,12 +107,18 @@ export interface CancellablePromiseLike<T> extends PromiseLike<T> {
   cancel(reason?: any): void
 }
 
+function isPromise(obj: any): obj is PromiseLike<any> {
+  return obj && typeof obj.then === 'function'
+}
+
+function noop() {}
+
 /**
  * FIFO task queue to run tasks in predictable order, without concurrency.
  */
 export class SequentialTaskQueue {
   static defaultScheduler: Scheduler = {
-    schedule: callback => setTimeout(<any>callback, 0),
+    schedule: callback => setTimeout(callback as any, 0),
   }
 
   private queue: TaskEntry[] = []
@@ -150,7 +156,7 @@ export class SequentialTaskQueue {
   push(task: Function, options?: TaskOptions): CancellablePromiseLike<any> {
     if (this._isClosed)
       throw new Error(`${this.name} has been previously closed`)
-    var taskEntry: TaskEntry = {
+    const taskEntry: TaskEntry = {
       callback: task,
       args:
         options && options.args
@@ -239,7 +245,7 @@ export class SequentialTaskQueue {
    * @param {Function} handler - Event handler. When invoking the handler, the queue will set itself as the `this` argument of the call.
    */
   once(evt: string, handler: Function) {
-    var cb = (...args: any[]) => {
+    const cb = (...args: any[]) => {
       this.removeListener(evt, cb)
       handler.apply(this, args)
     }
@@ -360,15 +366,9 @@ interface TaskEntry {
   reject?: (reason?: any) => void
 }
 
-function noop() {}
-
-function isPromise(obj: any): obj is PromiseLike<any> {
-  return obj && typeof obj.then === 'function'
-}
-
 SequentialTaskQueue.defaultScheduler = {
   schedule:
     typeof setImmediate === 'function'
-      ? callback => setImmediate(<(...args: any[]) => void>callback)
-      : callback => setTimeout(<(...args: any[]) => void>callback, 0),
+      ? callback => setImmediate(callback as (...args: any[]) => void)
+      : callback => setTimeout(callback as (...args: any[]) => void, 0),
 }
