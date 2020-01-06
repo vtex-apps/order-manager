@@ -9,7 +9,6 @@ import React, {
 } from 'react'
 import { ApolloClient, ApolloError } from 'apollo-client'
 import { useQuery } from 'react-apollo'
-
 import { Queries } from 'vtex.checkout-resources'
 
 import { dummyOrderForm, emptyOrderForm } from './utils/dummyOrderForm'

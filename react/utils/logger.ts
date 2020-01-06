@@ -22,7 +22,7 @@ interface LogConfig {
   event: any
 }
 
-declare var window: {
+declare let window: {
   __RUNTIME__: Runtime
 }
 
@@ -39,7 +39,7 @@ export const logSplunk = (config: LogConfig) => {
       workflowType,
       workflowInstance,
       event,
-      getAccount(),
+      getAccount()
     )
   }
 }
