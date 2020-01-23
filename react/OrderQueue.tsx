@@ -13,7 +13,7 @@ import { QueueStatus } from './constants'
 import { TaskQueue } from './modules/TaskQueue'
 import { CancellablePromiseLike } from './modules/SequentialTaskQueue'
 
-type ListenFunction = (event: QueueStatus, callback: () => any) => () => void
+type ListenFunction = (event: QueueStatus, callback: () => void) => () => void
 
 interface Context {
   enqueue: <T extends any>(

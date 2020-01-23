@@ -4,53 +4,113 @@ import React, {
   useMemo,
   useReducer,
   useEffect,
-  useState,
+  useCallback,
   FC,
 } from 'react'
-import { ApolloClient, ApolloError } from 'apollo-client'
-import { useQuery } from 'react-apollo'
+import { useQuery, useApolloClient } from 'react-apollo'
 import OrderFormQuery from 'vtex.checkout-resources/QueryOrderForm'
+import { ApolloError } from 'apollo-client'
 import { OrderForm } from 'vtex.checkout-graphql'
 
-import { dummyOrderForm, emptyOrderForm } from './utils/dummyOrderForm'
 import { logSplunk } from './utils/logger'
+
+type OrderFormUpdate =
+  | Partial<OrderForm>
+  | ((prevOrderForm: OrderForm) => Partial<OrderForm>)
 
 interface Context {
   loading: boolean
-  orderForm: OrderForm | undefined
-  setOrderForm: (orderForm: Partial<OrderForm>) => void
+  orderForm: OrderForm
+  setOrderForm: (nextValue: OrderFormUpdate) => void
   error: ApolloError | undefined
 }
 
-const OrderFormContext = createContext<Context | undefined>(undefined)
+const noop = () => {}
 
-const updateApolloCache = (client: ApolloClient<any>, orderForm: OrderForm) => {
-  const data = client.readQuery({ query: OrderFormQuery })
-  client.writeQuery({
-    query: OrderFormQuery,
-    data: {
-      ...data,
-      orderForm,
+// keep default value as -1 to indicate this order form
+// as the initial value (not yet synchonized with server).
+const UNSYNC_ORDER_FORM_VALUE = -1
+
+const DEFAULT_ORDER_FORM: OrderForm = {
+  items: [],
+  value: UNSYNC_ORDER_FORM_VALUE,
+  totalizers: [],
+  marketingData: {},
+}
+
+const OrderFormContext = createContext<Context>({
+  orderForm: DEFAULT_ORDER_FORM,
+  setOrderForm: noop,
+  error: undefined,
+  loading: false,
+})
+
+const useUpdateOrderFormCache = () => {
+  const client = useApolloClient()
+
+  const updateOrderFormCache = useCallback(
+    (orderForm: OrderForm) => {
+      const data = client.readQuery({ query: OrderFormQuery })
+      client.writeQuery({
+        query: OrderFormQuery,
+        data: {
+          ...data,
+          orderForm,
+        },
+      })
     },
-  })
+    [client]
+  )
+
+  return updateOrderFormCache
+}
+
+const reducer = (
+  prevOrderForm: OrderForm,
+  updateOrderForm: OrderFormUpdate
+) => {
+  if (typeof updateOrderForm === 'function') {
+    return {
+      ...prevOrderForm,
+      ...updateOrderForm(prevOrderForm),
+    }
+  }
+
+  return {
+    ...prevOrderForm,
+    ...updateOrderForm,
+  }
+}
+
+const saveLocalOrderForm = (orderForm: OrderForm) => {
+  localStorage.setItem('orderform', JSON.stringify(orderForm))
+}
+
+const getLocalOrderForm = (): OrderForm | null => {
+  let localOrderForm = null
+
+  try {
+    localOrderForm = JSON.parse(localStorage.getItem('orderform') ?? 'null')
+  } catch {
+    // ignore
+  }
+
+  return localOrderForm
 }
 
 export const OrderFormProvider: FC = ({ children }) => {
-  const { client, loading: loadingQuery, data, error } = useQuery<{
+  const { loading, data, error } = useQuery<{
     orderForm: OrderForm
   }>(OrderFormQuery, {
     ssr: false,
   })
 
   const [orderForm, setOrderForm] = useReducer(
-    (curOrderForm: OrderForm, newOrderForm: Partial<OrderForm>) => ({
-      ...curOrderForm,
-      ...newOrderForm,
-    }),
-    dummyOrderForm
+    reducer,
+    getLocalOrderForm() ?? DEFAULT_ORDER_FORM
   )
 
-  const [loading, setLoading] = useState(true)
+  const updateOrderFormCache = useUpdateOrderFormCache()
 
   useEffect(() => {
     if (error) {
@@ -66,30 +126,36 @@ export const OrderFormProvider: FC = ({ children }) => {
       console.error(error.message)
     }
 
-    if (loadingQuery) {
-      return
+    const localOrderFormString = localStorage.getItem('orderform')
+
+    if (localOrderFormString != null) {
+      const localOrderForm = JSON.parse(localOrderFormString)
+
+      if (localOrderForm.value !== UNSYNC_ORDER_FORM_VALUE) {
+        return
+      }
     }
 
-    setLoading(false)
-
-    if (data) {
+    if (!loading && !error && data) {
+      updateOrderFormCache(data.orderForm)
       setOrderForm(data.orderForm)
-      updateApolloCache(client, data.orderForm)
     }
-  }, [client, data, error, loadingQuery])
+  }, [data, error, loading, updateOrderFormCache])
 
-  const value = useMemo(
+  useEffect(() => {
+    saveLocalOrderForm(orderForm)
+  }, [orderForm])
+
+  const value = useMemo<Context>(
     () => ({
       error,
-      loading,
-      orderForm: error ? emptyOrderForm : orderForm,
-      setOrderForm: (newOrderForm: Partial<OrderForm>) => {
-        updateApolloCache(client, { ...orderForm, ...newOrderForm })
-        setOrderForm(newOrderForm)
-      },
+      orderForm,
+      setOrderForm,
+      loading: false,
     }),
-    [client, error, loading, orderForm]
+    [error, orderForm]
   )
+
   return (
     <OrderFormContext.Provider value={value}>
       {children}
