@@ -4,6 +4,7 @@ const orderForm = gql`
   query MockQuery {
     orderForm {
       items
+      value
     }
   }
 `

@@ -1,4 +1,4 @@
-export const mockOrderForm = {
+export const mockOrderForm = Object.freeze({
   id: '123',
   items: [
     {
@@ -65,4 +65,4 @@ export const mockOrderForm = {
     },
   ],
   value: 9585000,
-}
+})

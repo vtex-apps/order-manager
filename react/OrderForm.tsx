@@ -28,7 +28,7 @@ interface Context {
 const noop = () => {}
 
 // keep default value as -1 to indicate this order form
-// as the initial value (not yet synchonized with server).
+// is the initial value (not yet synchonized with server).
 const UNSYNC_ORDER_FORM_VALUE = -1
 
 const DEFAULT_ORDER_FORM: OrderForm = {
@@ -72,7 +72,13 @@ const reducer = (
   if (typeof updateOrderForm === 'function') {
     return {
       ...prevOrderForm,
-      ...updateOrderForm(prevOrderForm),
+      ...updateOrderForm({
+        ...prevOrderForm,
+        value:
+          prevOrderForm.value === UNSYNC_ORDER_FORM_VALUE
+            ? 0
+            : prevOrderForm.value,
+      }),
     }
   }
 
@@ -149,7 +155,11 @@ export const OrderFormProvider: FC = ({ children }) => {
   const value = useMemo<Context>(
     () => ({
       error,
-      orderForm,
+      orderForm: {
+        ...orderForm,
+        value:
+          orderForm.value === UNSYNC_ORDER_FORM_VALUE ? 0 : orderForm.value,
+      },
       setOrderForm,
       loading: false,
     }),
