@@ -18,6 +18,7 @@ const dummyItem = (id: string) => ({
 })
 
 export const dummyOrderForm = {
+  id: '',
   items: [dummyItem('1'), dummyItem('2')],
   shipping: {
     countries: [],
@@ -50,6 +51,7 @@ export const dummyOrderForm = {
 }
 
 export const emptyOrderForm = {
+  id: '',
   items: [],
   shipping: {
     countries: [],
