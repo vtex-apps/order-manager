@@ -1,4 +1,5 @@
 export const mockOrderForm = {
+  id: '123',
   items: [
     {
       additionalInfo: {

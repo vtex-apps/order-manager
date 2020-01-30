@@ -1,4 +1,5 @@
 interface OrderForm {
+  id: string
   items: Item[]
   marketingData: MarketingData | null
   totalizers: Totalizer[]
