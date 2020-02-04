@@ -147,13 +147,12 @@ describe('TaskQueue', () => {
   it('should return correct values when isWaiting is called', async () => {
     const queue = new TaskQueue()
     queue.enqueue(createScheduledTask(() => {}, 20))
-    const secondTaskStarts = new Promise((resolve: any) => queue.enqueue(
-      async () => {
+    const secondTaskStarts = new Promise((resolve: any) =>
+      queue.enqueue(async () => {
         resolve()
         await createScheduledTask(() => {}, 5)
-      },
-      'TaskID'
-    ))
+      }, 'TaskID')
+    )
 
     expect(queue.isWaiting('TaskID')).toEqual(true)
     await secondTaskStarts
