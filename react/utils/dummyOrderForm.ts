@@ -4,7 +4,7 @@ const dummyItem = (id: string): Item => ({
   additionalInfo: {
     brandName: '',
   },
-  id: id,
+  id,
   detailUrl: '',
   imageUrls: null,
   listPrice: 0,
@@ -20,7 +20,8 @@ const dummyItem = (id: string): Item => ({
   availability: 'available',
 })
 
-export const emptyOrderForm = {
+export const emptyOrderForm: OrderForm = {
+  canEditData: false,
   id: '',
   items: [],
   shipping: {
@@ -44,6 +45,10 @@ export const emptyOrderForm = {
   },
   marketingData: {
     coupon: '',
+  },
+  paymentData: {
+    installmentOptions: [],
+    paymentSystems: [],
   },
   messages: {
     couponMessages: [],
