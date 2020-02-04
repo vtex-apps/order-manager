@@ -32,6 +32,7 @@ const noop = () => {}
 const UNSYNC_ORDER_FORM_VALUE = -1
 
 const DEFAULT_ORDER_FORM: OrderForm = {
+  id: 'default-order-form',
   items: [],
   value: UNSYNC_ORDER_FORM_VALUE,
   totalizers: [],
