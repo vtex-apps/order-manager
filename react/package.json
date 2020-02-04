@@ -34,9 +34,9 @@
     "prettier": "^1.19.1",
     "tslint-eslint-rules": "^5.4.0",
     "typescript": "3.7.3",
-    "vtex.render-runtime": "http://vtex.vteximg.com.br/_v/public/typings/v1/vtex.render-runtime@8.88.0/public/@types/vtex.render-runtime",
-    "vtex.checkout-resources": "http://vtex.vteximg.com.br/_v/public/typings/v1/vtex.checkout-resources@0.14.2/public/@types/vtex.checkout-resources",
-    "vtex.checkout-graphql": "http://vtex.vteximg.com.br/_v/public/typings/v1/vtex.checkout-graphql@0.20.1/public/@types/vtex.checkout-graphql"
+    "vtex.checkout-graphql": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.checkout-graphql@0.22.0/public/@types/vtex.checkout-graphql",
+    "vtex.checkout-resources": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.checkout-resources@0.16.0/public/@types/vtex.checkout-resources",
+    "vtex.render-runtime": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.render-runtime@8.90.2/public/@types/vtex.render-runtime"
   },
   "version": "0.7.0"
 }
