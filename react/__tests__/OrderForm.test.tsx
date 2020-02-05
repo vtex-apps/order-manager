@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useEffect, useCallback } from 'react'
-import { fireEvent, render, wait } from '@vtex/test-tools/react'
+import { fireEvent, render, wait, act } from '@vtex/test-tools/react'
 import { Item } from 'vtex.checkout-graphql'
 
 import { mockOrderForm } from '../__mocks__/mockOrderForm'
@@ -18,6 +18,14 @@ const mockQuery = {
 }
 
 describe('OrderForm', () => {
+  beforeEach(() => {
+    jest.useFakeTimers()
+  })
+
+  afterEach(() => {
+    localStorage.clear()
+  })
+
   it('should be possible to update order form with a update function', async () => {
     const Component: FunctionComponent = () => {
       const { setOrderForm, orderForm } = useOrderForm()
@@ -25,7 +33,7 @@ describe('OrderForm', () => {
       const updateValue = useCallback(() => {
         setOrderForm(prevOrderForm => ({
           ...prevOrderForm,
-          value: prevOrderForm.value + 20,
+          value: prevOrderForm.value + 10,
         }))
       }, [setOrderForm])
 
@@ -44,16 +52,16 @@ describe('OrderForm', () => {
       { graphql: { mocks: [mockQuery] } }
     )
 
-    await wait(() => {})
+    await wait(() => jest.runAllTimers())
 
     expect(getByText(`${mockOrderForm.value}`)).toBeTruthy()
 
     const button = getByText('update')
     fireEvent.click(button)
 
-    await wait(() => {})
+    await wait(() => jest.runAllTimers())
 
-    expect(getByText(`${mockOrderForm.value + 20}`)).toBeTruthy()
+    expect(getByText(`${mockOrderForm.value + 10}`)).toBeTruthy()
   })
 
   it('should update order form to correct value', async () => {
@@ -61,13 +69,17 @@ describe('OrderForm', () => {
       const { orderForm, setOrderForm } = useOrderForm()
 
       useEffect(() => {
+        if (orderForm.value !== mockOrderForm.value) {
+          return
+        }
+
         setOrderForm(prevOrderForm => {
           return {
             ...prevOrderForm,
             value: prevOrderForm.value + 20,
           }
         })
-      }, [setOrderForm])
+      }, [orderForm.value, setOrderForm])
 
       return <span>{orderForm.value}</span>
     }
@@ -78,6 +90,8 @@ describe('OrderForm', () => {
       </OrderFormProvider>,
       { graphql: { mocks: [mockQuery] } }
     )
+
+    await wait(() => jest.runAllTimers())
 
     expect(getByText(`${mockOrderForm.value + 20}`)).toBeTruthy()
   })
@@ -102,7 +116,7 @@ describe('OrderForm', () => {
       { graphql: { mocks: [mockQuery] } }
     )
 
-    await wait(() => {})
+    await wait(() => jest.runAllTimers())
 
     expect(getByText(mockOrderForm.items[0].name)).toBeTruthy()
     expect(getByText(mockOrderForm.items[1].name)).toBeTruthy()
@@ -140,9 +154,11 @@ describe('OrderForm', () => {
       { graphql: { mocks: [mockQuery] } }
     )
 
-    const button = getByText('update')
-    fireEvent.click(button)
-
+    await wait(() => {
+      jest.runAllTimers()
+      const button = getByText('update')
+      fireEvent.click(button)
+    })
     expect(getByText('Mirai zura!')).toBeTruthy()
   })
 })
