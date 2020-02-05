@@ -37,6 +37,16 @@ const DEFAULT_ORDER_FORM: OrderForm = {
   value: UNSYNC_ORDER_FORM_VALUE,
   totalizers: [],
   marketingData: {},
+  canEditData: false,
+  paymentData: {
+    installmentOptions: [],
+    paymentSystems: [],
+  },
+  messages: {
+    couponMessages: [],
+    generalMessages: [],
+  },
+  shipping: {},
 }
 
 const OrderFormContext = createContext<Context>({
@@ -143,10 +153,12 @@ export const OrderFormProvider: FC = ({ children }) => {
       }
     }
 
-    if (!loading && !error && data) {
-      updateOrderFormCache(data.orderForm)
-      setOrderForm(data.orderForm)
+    if (loading || error || !data) {
+      return
     }
+
+    updateOrderFormCache(data.orderForm)
+    setOrderForm(data.orderForm)
   }, [data, error, loading, updateOrderFormCache])
 
   useEffect(() => {
