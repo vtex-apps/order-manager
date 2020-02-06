@@ -26,7 +26,7 @@ describe('OrderForm', () => {
     localStorage.clear()
   })
 
-  it('should be possible to update order form with a update function', async () => {
+  it('should be possible to update order form with an update function', async () => {
     const Component: FunctionComponent = () => {
       const { setOrderForm, orderForm } = useOrderForm()
 
