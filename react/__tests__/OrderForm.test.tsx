@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useEffect, useCallback } from 'react'
-import { fireEvent, render, wait, act } from '@vtex/test-tools/react'
+import { fireEvent, render, wait } from '@vtex/test-tools/react'
 import { Item } from 'vtex.checkout-graphql'
 
 import { mockOrderForm } from '../__mocks__/mockOrderForm'

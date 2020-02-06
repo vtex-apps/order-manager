@@ -61,7 +61,14 @@ const useUpdateOrderFormCache = () => {
 
   const updateOrderFormCache = useCallback(
     (orderForm: OrderForm) => {
-      const data = client.readQuery({ query: OrderFormQuery })
+      let data: Partial<OrderForm>
+
+      try {
+        data = client.readQuery({ query: OrderFormQuery }) ?? {}
+      } catch {
+        data = {}
+      }
+
       client.writeQuery({
         query: OrderFormQuery,
         data: {
