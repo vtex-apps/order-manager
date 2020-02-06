@@ -109,7 +109,7 @@ const getLocalOrderForm = (): OrderForm | null => {
   try {
     localOrderForm = JSON.parse(localStorage.getItem('orderform') ?? 'null')
   } catch {
-    // ignore
+    // ignore errors during SSR
   }
 
   return localOrderForm
@@ -162,8 +162,9 @@ export const OrderFormProvider: FC = ({ children }) => {
   }, [data, error, loading, updateOrderFormCache])
 
   useEffect(() => {
+    updateOrderFormCache(orderForm)
     saveLocalOrderForm(orderForm)
-  }, [orderForm])
+  }, [orderForm, updateOrderFormCache])
 
   const value = useMemo<Context>(
     () => ({
