@@ -169,7 +169,6 @@ export const OrderFormProvider: FC = ({ children }) => {
   }, [data, error, loading, updateOrderFormCache])
 
   useEffect(() => {
-    updateOrderFormCache(orderForm)
     saveLocalOrderForm(orderForm)
   }, [orderForm, updateOrderFormCache])
 
