@@ -6115,9 +6115,9 @@ verror@1.10.0:
   version "0.16.0"
   resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.checkout-resources@0.16.0/public/@types/vtex.checkout-resources#f1d52ec086fc0bfb4d07b17e870602f506c46509"
 
-"vtex.render-runtime@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.render-runtime@8.90.2/public/@types/vtex.render-runtime":
-  version "8.90.2"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.render-runtime@8.90.2/public/@types/vtex.render-runtime#48dc07cc1ca15280871226fe0fd85ac85fa5ef2e"
+"vtex.render-runtime@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.render-runtime@8.91.0/public/@types/vtex.render-runtime":
+  version "8.91.0"
+  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.render-runtime@8.91.0/public/@types/vtex.render-runtime#7223aebbd3645b633b52fc3c166c7803cbe700d4"
 
 w3c-hr-time@^1.0.1:
   version "1.0.1"
