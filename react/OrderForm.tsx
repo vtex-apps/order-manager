@@ -4,10 +4,9 @@ import React, {
   useMemo,
   useReducer,
   useEffect,
-  useCallback,
   FC,
 } from 'react'
-import { useQuery, useApolloClient } from 'react-apollo'
+import { useQuery } from 'react-apollo'
 import OrderFormQuery from 'vtex.checkout-resources/QueryOrderForm'
 import { ApolloError } from 'apollo-client'
 import { OrderForm } from 'vtex.checkout-graphql'
@@ -55,33 +54,6 @@ const OrderFormContext = createContext<Context>({
   error: undefined,
   loading: false,
 })
-
-const useUpdateOrderFormCache = () => {
-  const client = useApolloClient()
-
-  const updateOrderFormCache = useCallback(
-    (orderForm: OrderForm) => {
-      let data: Partial<OrderForm>
-
-      try {
-        data = client.readQuery({ query: OrderFormQuery }) ?? {}
-      } catch {
-        data = {}
-      }
-
-      client.writeQuery({
-        query: OrderFormQuery,
-        data: {
-          ...data,
-          orderForm,
-        },
-      })
-    },
-    [client]
-  )
-
-  return updateOrderFormCache
-}
 
 const reducer = (
   prevOrderForm: OrderForm,
@@ -134,8 +106,6 @@ export const OrderFormProvider: FC = ({ children }) => {
     getLocalOrderForm() ?? DEFAULT_ORDER_FORM
   )
 
-  const updateOrderFormCache = useUpdateOrderFormCache()
-
   useEffect(() => {
     if (error) {
       logSplunk({
@@ -164,13 +134,12 @@ export const OrderFormProvider: FC = ({ children }) => {
       return
     }
 
-    updateOrderFormCache(data.orderForm)
     setOrderForm(data.orderForm)
-  }, [data, error, loading, updateOrderFormCache])
+  }, [data, error, loading])
 
   useEffect(() => {
     saveLocalOrderForm(orderForm)
-  }, [orderForm, updateOrderFormCache])
+  }, [orderForm])
 
   const value = useMemo<Context>(
     () => ({
