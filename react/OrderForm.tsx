@@ -10,7 +10,6 @@ import { useQuery } from 'react-apollo'
 import OrderFormQuery from 'vtex.checkout-resources/QueryOrderForm'
 import { ApolloError } from 'apollo-client'
 import { OrderForm } from 'vtex.checkout-graphql'
-import { useSSR } from 'vtex.render-runtime'
 
 import { logSplunk } from './utils/logger'
 
@@ -83,8 +82,10 @@ const saveLocalOrderForm = (orderForm: OrderForm) => {
   localStorage.setItem('orderform', JSON.stringify(orderForm))
 }
 
-const getLocalOrderForm = (isSSR: boolean): OrderForm | null => {
-  return isSSR ? null : JSON.parse(localStorage.getItem('orderform') ?? 'null')
+const getLocalOrderForm = (): OrderForm | null => {
+  return typeof document === 'undefined'
+    ? null
+    : JSON.parse(localStorage.getItem('orderform') ?? 'null')
 }
 
 export const OrderFormProvider: FC = ({ children }) => {
@@ -94,11 +95,9 @@ export const OrderFormProvider: FC = ({ children }) => {
     ssr: false,
   })
 
-  const isSSR = useSSR()
-
   const [orderForm, setOrderForm] = useReducer(
     reducer,
-    getLocalOrderForm(isSSR) ?? DEFAULT_ORDER_FORM
+    getLocalOrderForm() ?? DEFAULT_ORDER_FORM
   )
 
   useEffect(() => {
