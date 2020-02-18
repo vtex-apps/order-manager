@@ -4,10 +4,8 @@ import { MockedProvider } from '@apollo/react-testing'
 import { Item } from 'vtex.checkout-graphql'
 
 import { mockOrderForm } from '../__mocks__/mockOrderForm'
-import { Queries } from '../__mocks__/vtex.checkout-resources'
+import OrderForm from '../__mocks__/vtex.checkout-resources/QueryOrderForm'
 import { OrderFormProvider, useOrderForm } from '../OrderForm'
-
-const { orderForm: OrderForm } = Queries
 
 const mockQuery = {
   request: {
@@ -69,10 +67,9 @@ describe('OrderForm', () => {
       }
       return (
         <div>
-          {orderForm &&
-            orderForm.items.map((item: Item) => (
-              <div key={item.id}>{item.name}</div>
-            ))}
+          {orderForm?.items.map((item: Item) => (
+            <div key={item.id}>{item.name}</div>
+          ))}
         </div>
       )
     }
@@ -106,10 +103,9 @@ describe('OrderForm', () => {
       return (
         <div>
           <div>
-            {orderForm &&
-              orderForm.items.map((item: Item) => (
-                <div key={item.id}>{item.name}</div>
-              ))}
+            {orderForm?.items.map((item: Item) => (
+              <div key={item.id}>{item.name}</div>
+            ))}
           </div>
           <button onClick={handleClick}>update</button>
         </div>

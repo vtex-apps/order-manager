@@ -8,4 +8,4 @@ const orderForm = gql`
   }
 `
 
-export const Queries = { orderForm }
+export default orderForm

@@ -9,13 +9,11 @@ import React, {
 } from 'react'
 import { ApolloClient, ApolloError } from 'apollo-client'
 import { useQuery } from 'react-apollo'
-import { Queries } from 'vtex.checkout-resources'
+import OrderFormQuery from 'vtex.checkout-resources/QueryOrderForm'
 import { OrderForm } from 'vtex.checkout-graphql'
 
 import { dummyOrderForm, emptyOrderForm } from './utils/dummyOrderForm'
 import { logSplunk } from './utils/logger'
-
-const { orderForm: OrderFormQuery } = Queries
 
 interface Context {
   loading: boolean
@@ -45,8 +43,8 @@ export const OrderFormProvider: FC = ({ children }) => {
   })
 
   const [orderForm, setOrderForm] = useReducer(
-    (orderForm: OrderForm, newOrderForm: Partial<OrderForm>) => ({
-      ...orderForm,
+    (curOrderForm: OrderForm, newOrderForm: Partial<OrderForm>) => ({
+      ...curOrderForm,
       ...newOrderForm,
     }),
     dummyOrderForm
