@@ -1,6 +1,5 @@
-import React, { FunctionComponent } from 'react'
+import React, { FunctionComponent, useEffect, useCallback } from 'react'
 import { fireEvent, render, wait } from '@vtex/test-tools/react'
-import { MockedProvider } from '@apollo/react-testing'
 import { Item } from 'vtex.checkout-graphql'
 
 import { mockOrderForm } from '../__mocks__/mockOrderForm'
@@ -23,51 +22,87 @@ describe('OrderForm', () => {
     jest.useFakeTimers()
   })
 
-  it('should throw when useOrderForm is called outside a OrderFormProvider', () => {
-    const oldConsoleError = console.error
-    console.error = () => {}
-
-    const Component: FunctionComponent = () => {
-      useOrderForm()
-      return <div>foo</div>
-    }
-
-    expect(() =>
-      render(<Component />, {
-        graphql: { mocks: [mockQuery] },
-        MockedProvider,
-      })
-    ).toThrow('useOrderForm must be used within a OrderFormProvider')
-
-    console.error = oldConsoleError
+  afterEach(() => {
+    localStorage.clear()
   })
 
-  it('should set loading=true when fetching the order form', async () => {
+  it('should be possible to update order form with an update function', async () => {
     const Component: FunctionComponent = () => {
-      const { loading } = useOrderForm()
-      return <div>{loading ? 'Loading' : 'Not loading'}</div>
+      const { setOrderForm, orderForm } = useOrderForm()
+
+      const updateValue = useCallback(() => {
+        setOrderForm(prevOrderForm => ({
+          ...prevOrderForm,
+          value: prevOrderForm.value + 10,
+        }))
+      }, [setOrderForm])
+
+      return (
+        <div>
+          <span>{orderForm.value}</span>
+          <button onClick={updateValue}>update</button>
+        </div>
+      )
     }
 
     const { getByText } = render(
       <OrderFormProvider>
         <Component />
       </OrderFormProvider>,
-      { graphql: { mocks: [mockQuery] }, MockedProvider }
+      { graphql: { mocks: [mockQuery] } }
     )
 
-    expect(getByText('Loading')).toBeTruthy()
     await wait(() => jest.runAllTimers())
+
+    expect(getByText(`${mockOrderForm.value}`)).toBeTruthy()
+
+    const button = getByText('update')
+    fireEvent.click(button)
+
+    await wait(() => jest.runAllTimers())
+
+    expect(getByText(`${mockOrderForm.value + 10}`)).toBeTruthy()
+  })
+
+  it('should update order form to correct value', async () => {
+    const Component: FunctionComponent = () => {
+      const { orderForm, setOrderForm } = useOrderForm()
+
+      useEffect(() => {
+        if (orderForm.value !== mockOrderForm.value) {
+          return
+        }
+
+        setOrderForm(prevOrderForm => {
+          return {
+            ...prevOrderForm,
+            value: prevOrderForm.value + 20,
+          }
+        })
+      }, [orderForm.value, setOrderForm])
+
+      return <span>{orderForm.value}</span>
+    }
+
+    const { getByText } = render(
+      <OrderFormProvider>
+        <Component />
+      </OrderFormProvider>,
+      { graphql: { mocks: [mockQuery] } }
+    )
+
+    await wait(() => jest.runAllTimers())
+
+    expect(getByText(`${mockOrderForm.value + 20}`)).toBeTruthy()
   })
 
   it('should correctly load the order form', async () => {
     const Component: FunctionComponent = () => {
-      const { loading, orderForm } = useOrderForm()
-      if (loading) {
-        return <div>Loading</div>
-      }
+      const { orderForm } = useOrderForm()
+
       return (
         <div>
-          {orderForm?.items.map((item: Item) => (
+          {orderForm.items.map((item: Item) => (
             <div key={item.id}>{item.name}</div>
           ))}
         </div>
@@ -78,10 +113,11 @@ describe('OrderForm', () => {
       <OrderFormProvider>
         <Component />
       </OrderFormProvider>,
-      { graphql: { mocks: [mockQuery] }, MockedProvider }
+      { graphql: { mocks: [mockQuery] } }
     )
 
     await wait(() => jest.runAllTimers())
+
     expect(getByText(mockOrderForm.items[0].name)).toBeTruthy()
     expect(getByText(mockOrderForm.items[1].name)).toBeTruthy()
     expect(getByText(mockOrderForm.items[2].name)).toBeTruthy()
@@ -89,10 +125,8 @@ describe('OrderForm', () => {
 
   it('should correctly update the order form', async () => {
     const Component: FunctionComponent = () => {
-      const { loading, orderForm, setOrderForm } = useOrderForm()
-      if (loading || !orderForm) {
-        return <div>Loading</div>
-      }
+      const { orderForm, setOrderForm } = useOrderForm()
+
       const handleClick = () => {
         const newItem = orderForm && {
           ...orderForm.items[1],
@@ -100,6 +134,7 @@ describe('OrderForm', () => {
         }
         setOrderForm({ items: [newItem] })
       }
+
       return (
         <div>
           <div>
@@ -116,7 +151,7 @@ describe('OrderForm', () => {
       <OrderFormProvider>
         <Component />
       </OrderFormProvider>,
-      { graphql: { mocks: [mockQuery] }, MockedProvider }
+      { graphql: { mocks: [mockQuery] } }
     )
 
     await wait(() => {

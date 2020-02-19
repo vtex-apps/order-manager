@@ -14,10 +14,10 @@ interface EnqueuedTask {
 export class TaskQueue {
   private queue: SequentialTaskQueue
   private taskIdMap: Record<string, EnqueuedTask>
-  private listeners: Record<QueueStatus, (() => any)[]>
+  private listeners: Record<QueueStatus, Array<() => any>>
   private isEmpty: boolean
 
-  public constructor() {
+  constructor() {
     this.queue = new SequentialTaskQueue()
     this.taskIdMap = {}
     this.listeners = {} as any
@@ -47,7 +47,32 @@ export class TaskQueue {
       if (id && this.taskIdMap[id]) {
         delete this.taskIdMap[id]
       }
-      return task()
+
+      return new Promise((resolve, reject) => {
+        const handleOnline = async () => {
+          try {
+            const result = await task()
+
+            resolve(result)
+          } catch (err) {
+            // we might have gone offline when this request was in-flight
+            // so we need to wait to be online again and replay this request
+            if (!navigator.onLine) {
+              return
+            }
+
+            reject(err)
+          }
+
+          window.removeEventListener('online', handleOnline)
+        }
+
+        window.addEventListener('online', handleOnline)
+
+        if (navigator.onLine) {
+          handleOnline()
+        }
+      })
     }
 
     const promise = this.queue.push(wrappedTask)
