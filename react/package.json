@@ -38,5 +38,5 @@
     "vtex.checkout-resources": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.checkout-resources@0.16.0/public/@types/vtex.checkout-resources",
     "vtex.render-runtime": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.render-runtime@8.90.2/public/@types/vtex.render-runtime"
   },
-  "version": "0.7.1"
+  "version": "0.7.2"
 }
