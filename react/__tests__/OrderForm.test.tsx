@@ -203,8 +203,8 @@ describe('OrderForm', () => {
 
     await wait(() => jest.runAllTimers())
 
-    expect(JSON.parse(localStorage.getItem('orderform')!).id).not.toBe(
-      mockOrderForm.id
+    expect(JSON.parse(localStorage.getItem('orderform')!).id).toBe(
+      'new-order-form'
     )
   })
 })
