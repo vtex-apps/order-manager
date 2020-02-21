@@ -125,7 +125,8 @@ export const OrderFormProvider: FC = ({ children }) => {
 
       if (
         localOrderForm.value !== UNSYNC_ORDER_FORM_VALUE &&
-        data.orderForm.id === localOrderForm.id
+        (data.orderForm.id === localOrderForm.id ||
+          localOrderForm.id === DEFAULT_ORDER_FORM.id)
       ) {
         return
       }
