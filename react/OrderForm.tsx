@@ -114,6 +114,10 @@ export const OrderFormProvider: FC = ({ children }) => {
       console.error(error.message)
     }
 
+    if (loading || error || !data) {
+      return
+    }
+
     const localOrderFormString = localStorage.getItem('orderform')
 
     if (localOrderFormString != null) {
@@ -121,16 +125,11 @@ export const OrderFormProvider: FC = ({ children }) => {
 
       if (
         localOrderForm.value !== UNSYNC_ORDER_FORM_VALUE &&
-        (!data ||
-          data.orderForm.id === localOrderForm.id ||
+        (data.orderForm.id === localOrderForm.id ||
           localOrderForm.id === DEFAULT_ORDER_FORM.id)
       ) {
         return
       }
-    }
-
-    if (loading || error || !data) {
-      return
     }
 
     setOrderForm(data.orderForm)
