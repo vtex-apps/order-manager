@@ -161,4 +161,50 @@ describe('OrderForm', () => {
     })
     expect(getByText('Mirai zura!')).toBeTruthy()
   })
+
+  it('should replace local order form if their ids differ', async () => {
+    localStorage.setItem('orderform', JSON.stringify(mockOrderForm))
+
+    const orderFormMockQuery = {
+      request: {
+        query: OrderForm,
+      },
+      result: {
+        data: {
+          orderForm: {
+            id: 'new-order-form',
+            items: [],
+            value: 0,
+          },
+        },
+      },
+    }
+
+    const Component: FunctionComponent = () => {
+      const { orderForm } = useOrderForm()
+
+      return (
+        <ul>
+          {orderForm.items?.map(item => (
+            <li key={item.id}>{item.name}</li>
+          ))}
+        </ul>
+      )
+    }
+
+    // we're testing the side effect, so we won't need
+    // to query the document
+    render(
+      <OrderFormProvider>
+        <Component />
+      </OrderFormProvider>,
+      { graphql: { mocks: [orderFormMockQuery] } }
+    )
+
+    await wait(() => jest.runAllTimers())
+
+    expect(JSON.parse(localStorage.getItem('orderform')!).id).toBe(
+      'new-order-form'
+    )
+  })
 })

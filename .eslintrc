@@ -5,5 +5,8 @@
     "node": true,
     "es6": true,
     "jest": true
+  },
+  "rules": {
+    "@typescript-eslint/ban-ts-ignore": "off"
   }
 }
