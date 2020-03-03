@@ -123,11 +123,7 @@ export const OrderFormProvider: FC = ({ children }) => {
     if (localOrderFormString != null) {
       const localOrderForm = JSON.parse(localOrderFormString) as OrderForm
 
-      if (
-        localOrderForm.value !== UNSYNC_ORDER_FORM_VALUE &&
-        (data.orderForm.id === localOrderForm.id ||
-          localOrderForm.id === DEFAULT_ORDER_FORM.id)
-      ) {
+      if (localOrderForm.value !== UNSYNC_ORDER_FORM_VALUE) {
         return
       }
     }

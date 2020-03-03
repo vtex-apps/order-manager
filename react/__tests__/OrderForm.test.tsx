@@ -162,7 +162,7 @@ describe('OrderForm', () => {
     expect(getByText('Mirai zura!')).toBeTruthy()
   })
 
-  it('should replace local order form if their ids differ', async () => {
+  it.skip('should replace local order form if their ids differ', async () => {
     localStorage.setItem('orderform', JSON.stringify(mockOrderForm))
 
     const orderFormMockQuery = {
