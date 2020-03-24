@@ -12,6 +12,7 @@ import { ApolloError } from 'apollo-client'
 import { OrderForm } from 'vtex.checkout-graphql'
 
 import { logSplunk } from './utils/logger'
+import { shouldUpdateOrderForm } from './utils/heuristics'
 
 type OrderFormUpdate =
   | Partial<OrderForm>
@@ -123,7 +124,10 @@ export const OrderFormProvider: FC = ({ children }) => {
     if (localOrderFormString != null) {
       const localOrderForm = JSON.parse(localOrderFormString) as OrderForm
 
-      if (localOrderForm.value !== UNSYNC_ORDER_FORM_VALUE) {
+      if (
+        localOrderForm.value !== UNSYNC_ORDER_FORM_VALUE ||
+        !shouldUpdateOrderForm(localOrderForm, data.orderForm)
+      ) {
         return
       }
     }
