@@ -125,7 +125,7 @@ export const OrderFormProvider: FC = ({ children }) => {
       const localOrderForm = JSON.parse(localOrderFormString) as OrderForm
 
       if (
-        localOrderForm.value !== UNSYNC_ORDER_FORM_VALUE ||
+        localOrderForm.value !== UNSYNC_ORDER_FORM_VALUE &&
         !shouldUpdateOrderForm(localOrderForm, data.orderForm)
       ) {
         return
