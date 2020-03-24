@@ -64,5 +64,11 @@ export const mockOrderForm = Object.freeze({
       value: 9585000,
     },
   ],
+  clientProfileData: {
+    email: '***@vt**.**',
+    firstName: 'U*e*',
+    lastName: 'N*m*',
+  },
+  canEditData: false,
   value: 9585000,
 })

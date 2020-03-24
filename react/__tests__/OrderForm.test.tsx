@@ -162,49 +162,103 @@ describe('OrderForm', () => {
     expect(getByText('Mirai zura!')).toBeTruthy()
   })
 
-  it.skip('should replace local order form if their ids differ', async () => {
-    localStorage.setItem('orderform', JSON.stringify(mockOrderForm))
+  describe('heuristics', () => {
+    it.skip('should replace local order form if their ids differ', async () => {
+      localStorage.setItem('orderform', JSON.stringify(mockOrderForm))
 
-    const orderFormMockQuery = {
-      request: {
-        query: OrderForm,
-      },
-      result: {
-        data: {
-          orderForm: {
-            id: 'new-order-form',
-            items: [],
-            value: 0,
+      const orderFormMockQuery = {
+        request: {
+          query: OrderForm,
+        },
+        result: {
+          data: {
+            orderForm: {
+              id: 'new-order-form',
+              items: [],
+              value: 0,
+            },
           },
         },
-      },
-    }
+      }
 
-    const Component: FunctionComponent = () => {
-      const { orderForm } = useOrderForm()
+      const Component: FunctionComponent = () => {
+        const { orderForm } = useOrderForm()
 
-      return (
-        <ul>
-          {orderForm.items?.map(item => (
-            <li key={item.id}>{item.name}</li>
-          ))}
-        </ul>
+        return (
+          <ul>
+            {orderForm.items?.map(item => (
+              <li key={item.id}>{item.name}</li>
+            ))}
+          </ul>
+        )
+      }
+
+      // we're testing the side effect, so we won't need
+      // to query the document
+      render(
+        <OrderFormProvider>
+          <Component />
+        </OrderFormProvider>,
+        { graphql: { mocks: [orderFormMockQuery] } }
       )
-    }
 
-    // we're testing the side effect, so we won't need
-    // to query the document
-    render(
-      <OrderFormProvider>
-        <Component />
-      </OrderFormProvider>,
-      { graphql: { mocks: [orderFormMockQuery] } }
-    )
+      await wait(() => jest.runAllTimers())
 
-    await wait(() => jest.runAllTimers())
+      expect(JSON.parse(localStorage.getItem('orderform')!).id).toBe(
+        'new-order-form'
+      )
+    })
 
-    expect(JSON.parse(localStorage.getItem('orderform')!).id).toBe(
-      'new-order-form'
-    )
+    it("should replace local order form when 'canEditData' differ", async () => {
+      localStorage.setItem('orderform', JSON.stringify(mockOrderForm))
+
+      const orderFormMockQuery = {
+        request: {
+          query: OrderForm,
+        },
+        result: {
+          data: {
+            orderForm: {
+              id: mockOrderForm.id,
+              canEditData: true,
+              clientProfileData: {
+                email: 'user@vtex.com',
+                firstName: 'User',
+                lastName: 'Name',
+              },
+              items: [],
+              value: 0,
+            },
+          },
+        },
+      }
+
+      const Component: FunctionComponent = () => {
+        const { orderForm } = useOrderForm()
+
+        return (
+          <ul>
+            {orderForm.items?.map(item => (
+              <li key={item.id}>{item.name}</li>
+            ))}
+          </ul>
+        )
+      }
+
+      // we're testing the side effect, so we won't need
+      // to query the document
+      render(
+        <OrderFormProvider>
+          <Component />
+        </OrderFormProvider>,
+        { graphql: { mocks: [orderFormMockQuery] } }
+      )
+
+      await wait(() => jest.runAllTimers())
+
+      const localOrderForm = JSON.parse(localStorage.getItem('orderform')!)
+
+      expect(localOrderForm.clientProfileData.email).toBe('user@vtex.com')
+    })
   })
 })
