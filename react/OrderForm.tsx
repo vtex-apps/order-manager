@@ -24,6 +24,10 @@ interface Context {
   error: ApolloError | undefined
 }
 
+interface Props {
+  setCheckoutCookie?: boolean
+}
+
 const noop = () => {}
 
 // keep default value as -1 to indicate this order form
@@ -88,11 +92,17 @@ const getLocalOrderForm = (): OrderForm | null => {
     : JSON.parse(localStorage.getItem('orderform') ?? 'null')
 }
 
-export const OrderFormProvider: FC = ({ children }) => {
+export const OrderFormProvider: FC<Props> = ({
+  children,
+  setCheckoutCookie = false,
+}) => {
   const { loading, data, error } = useQuery<{
     orderForm: OrderForm
   }>(OrderFormQuery, {
     ssr: false,
+    variables: {
+      setCheckoutCookie,
+    },
   })
 
   const [orderForm, setOrderForm] = useReducer(
