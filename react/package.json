@@ -27,7 +27,7 @@
     "eslint-config-vtex-react": "^5.1.0",
     "prettier": "^1.19.1",
     "tslint-eslint-rules": "^5.4.0",
-    "typescript": "3.7.3",
+    "typescript": "3.8.3",
     "vtex.checkout-graphql": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.checkout-graphql@0.22.0/public/@types/vtex.checkout-graphql",
     "vtex.checkout-resources": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.checkout-resources@0.16.0/public/@types/vtex.checkout-resources",
     "vtex.render-runtime": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.render-runtime@8.91.0/public/@types/vtex.render-runtime"
