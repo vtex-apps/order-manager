@@ -11,9 +11,8 @@ export const shouldUpdateOrderForm = (
   localOrderForm: OrderForm,
   remoteOrderForm: OrderForm
 ): boolean => {
-  if (localOrderForm.value === UNSYNC_ORDER_FORM_VALUE) {
-    return true
-  }
-
-  return localOrderForm.canEditData !== remoteOrderForm.canEditData
+  return (
+    localOrderForm.value === UNSYNC_ORDER_FORM_VALUE ||
+    localOrderForm.canEditData !== remoteOrderForm.canEditData
+  )
 }
