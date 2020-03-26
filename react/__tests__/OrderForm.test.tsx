@@ -9,6 +9,9 @@ import { OrderFormProvider, useOrderForm } from '../OrderForm'
 const mockQuery = {
   request: {
     query: OrderForm,
+    variables: {
+      setCheckoutCookie: false,
+    },
   },
   result: {
     data: {
