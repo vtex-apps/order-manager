@@ -5,6 +5,12 @@ const orderForm = gql`
     orderForm {
       id
       items
+      canEditData
+      clientProfileData {
+        email
+        firstName
+        lastName
+      }
       value
     }
   }

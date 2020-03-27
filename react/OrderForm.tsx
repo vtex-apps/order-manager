@@ -12,6 +12,8 @@ import { ApolloError } from 'apollo-client'
 import { OrderForm } from 'vtex.checkout-graphql'
 
 import { logSplunk } from './utils/logger'
+import { shouldUpdateOrderForm } from './utils/heuristics'
+import { UNSYNC_ORDER_FORM_VALUE } from './constants'
 
 type OrderFormUpdate =
   | Partial<OrderForm>
@@ -25,10 +27,6 @@ interface Context {
 }
 
 const noop = () => {}
-
-// keep default value as -1 to indicate this order form
-// is the initial value (not yet synchonized with server).
-const UNSYNC_ORDER_FORM_VALUE = -1
 
 const DEFAULT_ORDER_FORM: OrderForm = {
   id: 'default-order-form',
@@ -123,7 +121,7 @@ export const OrderFormProvider: FC = ({ children }) => {
     if (localOrderFormString != null) {
       const localOrderForm = JSON.parse(localOrderFormString) as OrderForm
 
-      if (localOrderForm.value !== UNSYNC_ORDER_FORM_VALUE) {
+      if (!shouldUpdateOrderForm(localOrderForm, data.orderForm)) {
         return
       }
     }
