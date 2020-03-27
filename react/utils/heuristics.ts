@@ -1,6 +1,9 @@
 import { OrderForm } from 'vtex.checkout-graphql'
 
-import { UNSYNC_ORDER_FORM_VALUE } from '../constants'
+import { UNSYNC_ORDER_FORM_VALUE, DEFAULT_ORDER_FORM } from '../constants'
+
+const orderFormOptimizationEnabled =
+  __RUNTIME__?.settings?.['vtex.store']?.enableOrderFormOptimization ?? false
 
 /**
  * Heuristic function to determine whether or not the local
@@ -13,6 +16,9 @@ export const shouldUpdateOrderForm = (
 ): boolean => {
   return (
     localOrderForm.value === UNSYNC_ORDER_FORM_VALUE ||
-    localOrderForm.canEditData !== remoteOrderForm.canEditData
+    localOrderForm.canEditData !== remoteOrderForm.canEditData ||
+    (orderFormOptimizationEnabled &&
+      localOrderForm.id !== remoteOrderForm.id &&
+      localOrderForm.id !== DEFAULT_ORDER_FORM.id)
   )
 }

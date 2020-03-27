@@ -163,7 +163,7 @@ describe('OrderForm', () => {
   })
 
   describe('heuristics', () => {
-    it.skip('should replace local order form if their ids differ', async () => {
+    it('should replace local order form if their ids differ', async () => {
       localStorage.setItem('orderform', JSON.stringify(mockOrderForm))
 
       const orderFormMockQuery = {
