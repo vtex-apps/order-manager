@@ -175,6 +175,8 @@ describe('OrderForm', () => {
             orderForm: {
               id: 'new-order-form',
               items: [],
+              canEditData: false,
+              clientProfileData: null,
               value: 0,
             },
           },
