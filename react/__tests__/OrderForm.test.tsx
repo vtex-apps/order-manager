@@ -1,9 +1,9 @@
 import React, { FunctionComponent, useEffect, useCallback } from 'react'
 import { fireEvent, render, wait } from '@vtex/test-tools/react'
 import { Item } from 'vtex.checkout-graphql'
+import OrderForm from 'vtex.checkout-resources/QueryOrderForm'
 
-import { mockOrderForm } from '../__mocks__/mockOrderForm'
-import OrderForm from '../__mocks__/vtex.checkout-resources/QueryOrderForm'
+import { mockOrderForm } from '../__fixtures__/orderForm'
 import { OrderFormProvider, useOrderForm } from '../OrderForm'
 
 const mockQuery = {
