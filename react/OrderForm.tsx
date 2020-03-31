@@ -13,7 +13,7 @@ import { OrderForm } from 'vtex.checkout-graphql'
 
 import { logSplunk } from './utils/logger'
 import { shouldUpdateOrderForm } from './utils/heuristics'
-import { UNSYNC_ORDER_FORM_VALUE } from './constants'
+import { UNSYNC_ORDER_FORM_VALUE, DEFAULT_ORDER_FORM } from './constants'
 
 type OrderFormUpdate =
   | Partial<OrderForm>
@@ -27,24 +27,6 @@ interface Context {
 }
 
 const noop = () => {}
-
-const DEFAULT_ORDER_FORM: OrderForm = {
-  id: 'default-order-form',
-  items: [],
-  value: UNSYNC_ORDER_FORM_VALUE,
-  totalizers: [],
-  marketingData: {},
-  canEditData: false,
-  paymentData: {
-    installmentOptions: [],
-    paymentSystems: [],
-  },
-  messages: {
-    couponMessages: [],
-    generalMessages: [],
-  },
-  shipping: {},
-}
 
 const OrderFormContext = createContext<Context>({
   orderForm: DEFAULT_ORDER_FORM,

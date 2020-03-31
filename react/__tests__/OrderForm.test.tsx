@@ -1,9 +1,9 @@
 import React, { FunctionComponent, useEffect, useCallback } from 'react'
 import { fireEvent, render, wait } from '@vtex/test-tools/react'
 import { Item } from 'vtex.checkout-graphql'
+import OrderForm from 'vtex.checkout-resources/QueryOrderForm'
 
-import { mockOrderForm } from '../__mocks__/mockOrderForm'
-import OrderForm from '../__mocks__/vtex.checkout-resources/QueryOrderForm'
+import { mockOrderForm } from '../__fixtures__/orderForm'
 import { OrderFormProvider, useOrderForm } from '../OrderForm'
 
 const mockQuery = {
@@ -163,7 +163,7 @@ describe('OrderForm', () => {
   })
 
   describe('heuristics', () => {
-    it.skip('should replace local order form if their ids differ', async () => {
+    it('should replace local order form if their ids differ', async () => {
       localStorage.setItem('orderform', JSON.stringify(mockOrderForm))
 
       const orderFormMockQuery = {
@@ -175,6 +175,8 @@ describe('OrderForm', () => {
             orderForm: {
               id: 'new-order-form',
               items: [],
+              canEditData: false,
+              clientProfileData: null,
               value: 0,
             },
           },
