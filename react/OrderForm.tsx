@@ -5,6 +5,7 @@ import React, {
   useReducer,
   useEffect,
   FC,
+  useState,
 } from 'react'
 import { useQuery } from 'react-apollo'
 import OrderFormQuery from 'vtex.checkout-resources/QueryOrderForm'
@@ -13,7 +14,12 @@ import { OrderForm } from 'vtex.checkout-graphql'
 
 import { logSplunk } from './utils/logger'
 import { shouldUpdateOrderForm } from './utils/heuristics'
-import { UNSYNC_ORDER_FORM_VALUE, DEFAULT_ORDER_FORM } from './constants'
+import {
+  UNSYNC_ORDER_FORM_VALUE,
+  DEFAULT_ORDER_FORM,
+  QueueStatus,
+} from './constants'
+import { useOrderQueue, useQueueStatus } from './OrderQueue'
 
 type OrderFormUpdate =
   | Partial<OrderForm>
@@ -75,10 +81,24 @@ export const OrderFormProvider: FC = ({ children }) => {
     ssr: false,
   })
 
+  const shouldUseLocalOrderForm =
+    typeof document !== 'undefined' && !navigator.onLine
+
   const [orderForm, setOrderForm] = useReducer(
     reducer,
-    getLocalOrderForm() ?? DEFAULT_ORDER_FORM
+    (shouldUseLocalOrderForm ? getLocalOrderForm() : DEFAULT_ORDER_FORM) ??
+      DEFAULT_ORDER_FORM
   )
+
+  // use a different variable to store the loading state because if some
+  // component uses the `loading` from the Apollo query they won't be perfectly
+  // synchronized with our `orderForm` state and could cause some anomalies.
+  const [orderFormLoading, setOrderFormLoading] = useState(
+    !shouldUseLocalOrderForm
+  )
+
+  const { listen } = useOrderQueue()
+  const queueStatusRef = useQueueStatus(listen)
 
   useEffect(() => {
     if (error) {
@@ -98,18 +118,34 @@ export const OrderFormProvider: FC = ({ children }) => {
       return
     }
 
-    const localOrderFormString = localStorage.getItem('orderform')
+    const localOrderForm = getLocalOrderForm()
 
-    if (localOrderFormString != null) {
-      const localOrderForm = JSON.parse(localOrderFormString) as OrderForm
+    if (localOrderForm != null) {
+      if (
+        !shouldUpdateOrderForm(localOrderForm, data.orderForm) ||
+        // if the queue is fulfilled, we will use the remote order form
+        // regardless of the local status.
+        //
+        // if the queue is pending the remote order form isn't important because
+        // it is expected that when the last task in the queue is finalized, the
+        // component will call `setOrderForm` with the most up-to-date value.
+        queueStatusRef.current !== QueueStatus.FULFILLED
+      ) {
+        setOrderFormLoading(false)
+        setOrderForm(prevOrderForm => {
+          if (prevOrderForm.id !== DEFAULT_ORDER_FORM.id) {
+            return prevOrderForm
+          }
 
-      if (!shouldUpdateOrderForm(localOrderForm, data.orderForm)) {
+          return localOrderForm
+        })
         return
       }
     }
 
     setOrderForm(data.orderForm)
-  }, [data, error, loading])
+    setOrderFormLoading(false)
+  }, [data, error, loading, queueStatusRef])
 
   useEffect(() => {
     saveLocalOrderForm(orderForm)
@@ -124,9 +160,9 @@ export const OrderFormProvider: FC = ({ children }) => {
           orderForm.value === UNSYNC_ORDER_FORM_VALUE ? 0 : orderForm.value,
       },
       setOrderForm,
-      loading: false,
+      loading: orderFormLoading,
     }),
-    [error, orderForm]
+    [error, orderForm, orderFormLoading]
   )
 
   return (
