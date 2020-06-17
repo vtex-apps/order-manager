@@ -5,6 +5,7 @@ import OrderForm from 'vtex.checkout-resources/QueryOrderForm'
 
 import { mockOrderForm } from '../__fixtures__/orderForm'
 import { OrderFormProvider, useOrderForm } from '../OrderForm'
+import { OrderQueueProvider } from '../OrderQueue'
 
 const mockQuery = {
   request: {
@@ -46,9 +47,11 @@ describe('OrderForm', () => {
     }
 
     const { getByText } = render(
-      <OrderFormProvider>
-        <Component />
-      </OrderFormProvider>,
+      <OrderQueueProvider>
+        <OrderFormProvider>
+          <Component />
+        </OrderFormProvider>
+      </OrderQueueProvider>,
       { graphql: { mocks: [mockQuery] } }
     )
 
@@ -85,9 +88,11 @@ describe('OrderForm', () => {
     }
 
     const { getByText } = render(
-      <OrderFormProvider>
-        <Component />
-      </OrderFormProvider>,
+      <OrderQueueProvider>
+        <OrderFormProvider>
+          <Component />
+        </OrderFormProvider>
+      </OrderQueueProvider>,
       { graphql: { mocks: [mockQuery] } }
     )
 
@@ -110,9 +115,11 @@ describe('OrderForm', () => {
     }
 
     const { getByText } = render(
-      <OrderFormProvider>
-        <Component />
-      </OrderFormProvider>,
+      <OrderQueueProvider>
+        <OrderFormProvider>
+          <Component />
+        </OrderFormProvider>
+      </OrderQueueProvider>,
       { graphql: { mocks: [mockQuery] } }
     )
 
@@ -148,9 +155,11 @@ describe('OrderForm', () => {
     }
 
     const { getByText } = render(
-      <OrderFormProvider>
-        <Component />
-      </OrderFormProvider>,
+      <OrderQueueProvider>
+        <OrderFormProvider>
+          <Component />
+        </OrderFormProvider>
+      </OrderQueueProvider>,
       { graphql: { mocks: [mockQuery] } }
     )
 
@@ -198,9 +207,11 @@ describe('OrderForm', () => {
       // we're testing the side effect, so we won't need
       // to query the document
       render(
-        <OrderFormProvider>
-          <Component />
-        </OrderFormProvider>,
+        <OrderQueueProvider>
+          <OrderFormProvider>
+            <Component />
+          </OrderFormProvider>
+        </OrderQueueProvider>,
         { graphql: { mocks: [orderFormMockQuery] } }
       )
 
@@ -250,9 +261,11 @@ describe('OrderForm', () => {
       // we're testing the side effect, so we won't need
       // to query the document
       render(
-        <OrderFormProvider>
-          <Component />
-        </OrderFormProvider>,
+        <OrderQueueProvider>
+          <OrderFormProvider>
+            <Component />
+          </OrderFormProvider>
+        </OrderQueueProvider>,
         { graphql: { mocks: [orderFormMockQuery] } }
       )
 
