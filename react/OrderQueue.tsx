@@ -3,10 +3,10 @@ import React, {
   FC,
   ReactNode,
   useContext,
-  useEffect,
   useMemo,
   useRef,
   useState,
+  useLayoutEffect,
 } from 'react'
 
 import { QueueStatus } from './constants'
@@ -33,7 +33,7 @@ const OrderQueueContext = createContext<Context | undefined>(undefined)
 export const useQueueStatus = (listen: ListenFunction) => {
   const queueStatus = useRef(QueueStatus.FULFILLED)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const unlisten = listen(
       QueueStatus.PENDING,
       () => (queueStatus.current = QueueStatus.PENDING)
@@ -41,7 +41,7 @@ export const useQueueStatus = (listen: ListenFunction) => {
     return unlisten
   }, [listen])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const unlisten = listen(
       QueueStatus.FULFILLED,
       () => (queueStatus.current = QueueStatus.FULFILLED)
