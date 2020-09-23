@@ -16,13 +16,19 @@ export const DEFAULT_ORDER_FORM: OrderForm = {
   totalizers: [],
   marketingData: {},
   canEditData: false,
+  loggedIn: false,
   paymentData: {
+    isValid: false,
     installmentOptions: [],
     paymentSystems: [],
+    payments: [],
+    availableAccounts: [],
   },
   messages: {
     couponMessages: [],
     generalMessages: [],
   },
-  shipping: {},
+  shipping: {
+    isValid: false,
+  },
 }

@@ -11,8 +11,8 @@ import { useQuery } from 'react-apollo'
 import OrderFormQuery from 'vtex.checkout-resources/QueryOrderForm'
 import { ApolloError } from 'apollo-client'
 import { OrderForm } from 'vtex.checkout-graphql'
+import { useSplunk } from 'vtex.checkout-splunk'
 
-import { logSplunk } from './utils/logger'
 import { shouldUpdateOrderForm } from './utils/heuristics'
 import {
   UNSYNC_ORDER_FORM_VALUE,
@@ -75,6 +75,7 @@ const getLocalOrderForm = (): OrderForm | null => {
 }
 
 export const OrderFormProvider: FC = ({ children }) => {
+  const { logSplunk } = useSplunk()
   const { loading, data, error } = useQuery<{
     orderForm: OrderForm
   }>(OrderFormQuery, {
@@ -145,7 +146,7 @@ export const OrderFormProvider: FC = ({ children }) => {
 
     setOrderForm(data.orderForm)
     setOrderFormLoading(false)
-  }, [data, error, loading, queueStatusRef])
+  }, [data, error, loading, logSplunk, queueStatusRef])
 
   useEffect(() => {
     saveLocalOrderForm(orderForm)
