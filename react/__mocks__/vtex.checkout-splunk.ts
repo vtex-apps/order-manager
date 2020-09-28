@@ -1,4 +1,7 @@
+const logSplunk = jest.fn()
+const logKpiEvent = jest.fn()
+
 export const useSplunk = () => ({
-  logSplunk: jest.fn(),
-  logKpiEvent: jest.fn(),
+  logSplunk,
+  logKpiEvent,
 })
