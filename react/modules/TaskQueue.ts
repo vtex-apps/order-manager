@@ -2,9 +2,7 @@ import {
   CancellablePromiseLike,
   SequentialTaskQueue,
 } from './SequentialTaskQueue'
-import { QueueStatus } from '../constants'
-
-export const TASK_CANCELLED_CODE = 'TASK_CANCELLED'
+import { QueueStatus, TASK_CANCELLED_CODE } from '../constants'
 
 interface EnqueuedTask {
   task: () => Promise<any>

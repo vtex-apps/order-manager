@@ -1,5 +1,5 @@
-import { TaskQueue, TASK_CANCELLED_CODE } from './TaskQueue'
-import { QueueStatus } from '../constants'
+import { TaskQueue } from './TaskQueue'
+import { QueueStatus, TASK_CANCELLED_CODE } from '../constants'
 
 const createScheduledTask = (task: () => any, time: number) => () =>
   new Promise(resolve => {
@@ -59,7 +59,7 @@ describe('TaskQueue', () => {
 
   it('should not cancel a running task if a newer one with same id is pushed to the queue', async () => {
     const queue = new TaskQueue()
-    const tasks: PromiseLike<any>[] = []
+    const tasks: Array<PromiseLike<any>> = []
 
     const innerTask = createScheduledTask(() => 'bar', 5)
 
