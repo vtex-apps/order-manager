@@ -8,6 +8,7 @@ import React, {
   useState,
   useLayoutEffect,
 } from 'react'
+import { OrderForm } from 'vtex.checkout-graphql'
 
 import { QueueStatus } from './constants'
 import { TaskQueue } from './modules/TaskQueue'
@@ -16,10 +17,10 @@ import { CancellablePromiseLike } from './modules/SequentialTaskQueue'
 type ListenFunction = (event: QueueStatus, callback: () => void) => () => void
 
 interface Context {
-  enqueue: <T extends any>(
-    task: () => Promise<T>,
+  enqueue: (
+    task: () => Promise<OrderForm>,
     id?: string
-  ) => CancellablePromiseLike<T>
+  ) => CancellablePromiseLike<OrderForm>
   listen: ListenFunction
   isWaiting: (id: string) => boolean
 }

@@ -20,6 +20,7 @@ import {
   QueueStatus,
 } from './constants'
 import { useOrderQueue, useQueueStatus } from './OrderQueue'
+import useOrderFormMessages from './modules/useOrderFormMessages'
 
 type OrderFormUpdate =
   | Partial<OrderForm>
@@ -152,6 +153,8 @@ export const OrderFormProvider: FC = ({ children }) => {
     saveLocalOrderForm(orderForm)
   }, [orderForm])
 
+  useOrderFormMessages(orderForm, setOrderForm)
+
   const value = useMemo<Context>(
     () => ({
       error,
@@ -159,6 +162,10 @@ export const OrderFormProvider: FC = ({ children }) => {
         ...orderForm,
         value:
           orderForm.value === UNSYNC_ORDER_FORM_VALUE ? 0 : orderForm.value,
+        messages: {
+          ...orderForm.messages,
+          generalMessages: [],
+        },
       },
       setOrderForm,
       loading: orderFormLoading,

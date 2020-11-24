@@ -12,7 +12,8 @@
   "dependencies": {
     "vtex.checkout-resources": "0.x",
     "vtex.checkout-graphql": "0.x",
-    "vtex.checkout-splunk": "0.x"
+    "vtex.checkout-splunk": "0.x",
+    "vtex.styleguide": "9.x"
   },
   "mustUpdateAt": "2019-04-02",
   "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema"

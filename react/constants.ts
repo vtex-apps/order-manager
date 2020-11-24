@@ -5,6 +5,8 @@ export enum QueueStatus {
   FULFILLED = 'Fulfilled',
 }
 
+export const TASK_CANCELLED_CODE = 'TASK_CANCELLED'
+
 // keep default value as -1 to indicate this order form
 // is the initial value (not yet synchonized with server).
 export const UNSYNC_ORDER_FORM_VALUE = -1
@@ -30,5 +32,12 @@ export const DEFAULT_ORDER_FORM: OrderForm = {
   },
   shipping: {
     isValid: false,
+    deliveryOptions: [],
+    pickupOptions: [],
   },
+}
+
+export default {
+  QueueStatus,
+  TASK_CANCELLED_CODE,
 }
