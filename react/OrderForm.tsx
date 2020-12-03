@@ -81,6 +81,7 @@ export const OrderFormProvider: FC = ({ children }) => {
     orderForm: OrderForm
   }>(OrderFormQuery, {
     ssr: false,
+    fetchPolicy: 'no-cache',
   })
 
   const shouldUseLocalOrderForm =
