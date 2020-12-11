@@ -1,7 +1,5 @@
-import {
-  CancellablePromiseLike,
-  SequentialTaskQueue,
-} from './SequentialTaskQueue'
+import type { CancellablePromiseLike } from './SequentialTaskQueue'
+import { SequentialTaskQueue } from './SequentialTaskQueue'
 import { QueueStatus, TASK_CANCELLED_CODE } from '../constants'
 
 interface EnqueuedTask {
@@ -42,14 +40,14 @@ export class TaskQueue {
     }
 
     const wrappedTask = () => {
-      if (id && this.taskIdMap[id]) {
-        delete this.taskIdMap[id]
-      }
-
       return new Promise((resolve, reject) => {
         const handleOnline = async () => {
           try {
             const result = await task()
+
+            if (id && this.taskIdMap[id]) {
+              delete this.taskIdMap[id]
+            }
 
             resolve(result)
           } catch (err) {
@@ -57,6 +55,10 @@ export class TaskQueue {
             // so we need to wait to be online again and replay this request
             if (!navigator.onLine) {
               return
+            }
+
+            if (id && this.taskIdMap[id]) {
+              delete this.taskIdMap[id]
             }
 
             reject(err)
@@ -75,9 +77,11 @@ export class TaskQueue {
 
     const promise = this.queue.push(wrappedTask)
     const cancelPromise = promise.cancel
+
     promise.cancel = () =>
       cancelPromise({
         code: TASK_CANCELLED_CODE,
+        index: this.queue.indexOf(wrappedTask),
       })
 
     if (id) {
@@ -99,6 +103,7 @@ export class TaskQueue {
 
     const unlisten = () => {
       const index = this.listeners[event].indexOf(cb)
+
       if (index !== -1) {
         this.listeners[event].splice(index, 1)
       }
@@ -109,7 +114,7 @@ export class TaskQueue {
 
   private emit(event: QueueStatus) {
     if (this.listeners[event]) {
-      this.listeners[event].forEach(cb => cb())
+      this.listeners[event].forEach((cb) => cb())
     }
   }
 }

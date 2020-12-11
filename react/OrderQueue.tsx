@@ -1,18 +1,17 @@
+import type { FC, ReactNode } from 'react'
 import React, {
   createContext,
-  FC,
-  ReactNode,
   useContext,
   useMemo,
   useRef,
   useState,
   useLayoutEffect,
 } from 'react'
-import { OrderForm } from 'vtex.checkout-graphql'
+import type { OrderForm } from 'vtex.checkout-graphql'
 
 import { QueueStatus } from './constants'
 import { TaskQueue } from './modules/TaskQueue'
-import { CancellablePromiseLike } from './modules/SequentialTaskQueue'
+import type { CancellablePromiseLike } from './modules/SequentialTaskQueue'
 
 type ListenFunction = (event: QueueStatus, callback: () => void) => () => void
 
@@ -39,6 +38,7 @@ export const useQueueStatus = (listen: ListenFunction) => {
       QueueStatus.PENDING,
       () => (queueStatus.current = QueueStatus.PENDING)
     )
+
     return unlisten
   }, [listen])
 
@@ -47,6 +47,7 @@ export const useQueueStatus = (listen: ListenFunction) => {
       QueueStatus.FULFILLED,
       () => (queueStatus.current = QueueStatus.FULFILLED)
     )
+
     return unlisten
   }, [listen])
 
@@ -76,6 +77,7 @@ export const OrderQueueProvider: FC<OrderQueueProviderProps> = ({
 
 export const useOrderQueue = () => {
   const context = useContext(OrderQueueContext)
+
   if (context === undefined) {
     throw new Error('useOrderQueue must be used within a OrderQueueProvider')
   }

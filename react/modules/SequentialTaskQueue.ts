@@ -11,7 +11,7 @@ export interface Scheduler {
   /**
    * Schedules a callback for asynchronous execution.
    */
-  schedule(callback: Function): void
+  schedule(callback: () => void): void
 }
 
 /**
@@ -113,26 +113,28 @@ function isPromise(obj: any): obj is PromiseLike<any> {
 
 function noop() {}
 
+type EventListener = () => void
+
 /**
  * FIFO task queue to run tasks in predictable order, without concurrency.
  */
 export class SequentialTaskQueue {
-  static defaultScheduler: Scheduler = {
-    schedule: callback => setTimeout(callback as any, 0),
+  public static defaultScheduler: Scheduler = {
+    schedule: (callback) => setTimeout(() => callback(), 0),
   }
 
   private queue: TaskEntry[] = []
   private _isClosed = false
-  private waiters: Function[] = []
+  private waiters: EventListener[] = []
   private defaultTimeout?: number
   private currentTask?: TaskEntry
   private scheduler: Scheduler
-  private events?: { [key: string]: Function[] }
+  private events?: { [key: string]: EventListener[] }
 
-  name: string
+  private name: string
 
   /** Indicates if the queue has been closed. Calling {@link SequentialTaskQueue.push} on a closed queue will result in an exception. */
-  get isClosed() {
+  public get isClosed() {
     return this._isClosed
   }
 
@@ -143,8 +145,8 @@ export class SequentialTaskQueue {
   constructor(options?: SequentialTaskQueueOptions) {
     if (!options) options = {}
     this.defaultTimeout = options.timeout
-    this.name = options.name || 'SequentialTaskQueue'
-    this.scheduler = options.scheduler || SequentialTaskQueue.defaultScheduler
+    this.name = options.name ?? 'SequentialTaskQueue'
+    this.scheduler = options.scheduler ?? SequentialTaskQueue.defaultScheduler
   }
 
   /**
@@ -153,27 +155,30 @@ export class SequentialTaskQueue {
    * @param {TaskOptions} options - An object containing arguments and options for the task.
    * @returns {CancellablePromiseLike<any>} A promise that can be used to await or cancel the task.
    */
-  push(task: Function, options?: TaskOptions): CancellablePromiseLike<any> {
-    if (this._isClosed)
+  public push(
+    task: TaskEntryFn,
+    options?: TaskOptions
+  ): CancellablePromiseLike<any> {
+    if (this._isClosed) {
       throw new Error(`${this.name} has been previously closed`)
+    }
+
     const taskEntry: TaskEntry = {
       callback: task,
-      args:
-        options && options.args
-          ? Array.isArray(options.args)
-            ? options.args.slice()
-            : [options.args]
-          : [],
+      args: options?.args
+        ? Array.isArray(options.args)
+          ? options.args.slice()
+          : [options.args]
+        : [],
       timeout:
-        options && options.timeout !== undefined
-          ? options.timeout
-          : this.defaultTimeout,
+        options?.timeout !== undefined ? options.timeout : this.defaultTimeout,
       cancellationToken: {
         cancel: (reason?) => this.cancelTask(taskEntry, reason),
       },
       resolve: undefined,
       reject: undefined,
     }
+
     taskEntry.args.push(taskEntry.cancellationToken)
     this.queue.push(taskEntry)
     this.scheduler.schedule(() => this.next())
@@ -181,8 +186,10 @@ export class SequentialTaskQueue {
       taskEntry.resolve = resolve
       taskEntry.reject = reject
     }) as any) as CancellablePromiseLike<any>
+
     result.cancel = (reason?: any) =>
       taskEntry.cancellationToken.cancel!(reason)
+
     return result
   }
 
@@ -190,18 +197,42 @@ export class SequentialTaskQueue {
    * Cancels the currently running task (if any), and clears the queue.
    * @returns {Promise} A Promise that is fulfilled when the queue is empty and the current task has been cancelled.
    */
-  cancel(): PromiseLike<any> {
-    if (this.currentTask)
+  public cancel(): PromiseLike<any> {
+    if (this.currentTask) {
       this.cancelTask(this.currentTask, cancellationTokenReasons.cancel)
+    }
+
     const queue = this.queue.splice(0)
+
     // Cancel all and emit a drained event if there were tasks waiting in the queue
     if (queue.length) {
-      queue.forEach(task =>
+      queue.forEach((task) =>
         this.cancelTask(task, cancellationTokenReasons.cancel)
       )
       this.emit(sequentialTaskQueueEvents.drained)
     }
+
     return this.wait()
+  }
+
+  public indexOf(task: TaskEntryFn): number {
+    if (this.currentTask?.callback === task) {
+      return 0
+    }
+
+    const queueIndex = this.queue
+      // Skip cancelled tasks
+      .filter((taskEntry) => !taskEntry.cancellationToken?.cancelled)
+      .findIndex((taskEntry) => taskEntry.callback === task)
+
+    if (queueIndex < 0) {
+      return queueIndex
+    }
+
+    // Add 1 here because the queue is always missing the first
+    // element, which is stored in `this.currentTask`, so we need
+    // to shift the index by 1.
+    return queueIndex + 1
   }
 
   /**
@@ -210,11 +241,12 @@ export class SequentialTaskQueue {
    * @param {boolean} cancel - Indicates that the queue should also be cancelled.
    * @returns {Promise} A Promise that is fulfilled when the queue has finished executing remaining tasks.
    */
-  close(cancel?: boolean): PromiseLike<any> {
+  public close(cancel?: boolean): PromiseLike<any> {
     if (!this._isClosed) {
       this._isClosed = true
       if (cancel) return this.cancel()
     }
+
     return this.wait()
   }
 
@@ -222,9 +254,10 @@ export class SequentialTaskQueue {
    * Returns a promise that is fulfilled when the queue is empty.
    * @returns {Promise}
    */
-  wait(): PromiseLike<any> {
+  public wait(): PromiseLike<any> {
     if (!this.currentTask && this.queue.length === 0) return Promise.resolve()
-    return new Promise(resolve => {
+
+    return new Promise((resolve) => {
       this.waiters.push(resolve)
     })
   }
@@ -234,8 +267,8 @@ export class SequentialTaskQueue {
    * @param {string} evt - Event name. See the readme for a list of valid events.
    * @param {Function} handler - Event handler. When invoking the handler, the queue will set itself as the `this` argument of the call.
    */
-  on(evt: string, handler: Function) {
-    this.events = this.events || {}
+  public on(evt: string, handler: EventListener) {
+    this.events = this.events ?? {}
     ;(this.events[evt] || (this.events[evt] = [])).push(handler)
   }
 
@@ -244,11 +277,12 @@ export class SequentialTaskQueue {
    * @param {string} evt - Event name. See the readme for a list of valid events.
    * @param {Function} handler - Event handler. When invoking the handler, the queue will set itself as the `this` argument of the call.
    */
-  once(evt: string, handler: Function) {
+  public once(evt: string, handler: EventListener) {
     const cb = (...args: any[]) => {
       this.removeListener(evt, cb)
       handler.apply(this, args)
     }
+
     this.on(evt, cb)
   }
 
@@ -257,11 +291,13 @@ export class SequentialTaskQueue {
    * @param {string} evt - Event name
    * @param {Function} handler - Event handler to be removed
    */
-  removeListener(evt: string, handler: Function) {
+  public removeListener(evt: string, handler: EventListener) {
     if (this.events) {
       const list = this.events[evt]
+
       if (list) {
         let i = 0
+
         while (i < list.length) {
           if (list[i] === handler) list.splice(i, 1)
           else i++
@@ -271,25 +307,27 @@ export class SequentialTaskQueue {
   }
 
   /** @see {@link SequentialTaskQueue.removeListener} */
-  off(evt: string, handler: Function) {
+  public off(evt: string, handler: EventListener) {
     return this.removeListener(evt, handler)
   }
 
   protected emit(evt: string, ...args: any[]) {
-    if (this.events && this.events[evt])
+    if (this.events?.[evt]) {
       try {
-        this.events[evt].forEach(fn => fn.apply(this, args))
+        this.events[evt].forEach((fn) => fn.apply(this, args))
       } catch (e) {
         console.error(`${this.name}: Exception in '${evt}' event handler`, e)
       }
+    }
   }
 
   protected next() {
     // Try running the next task, if not currently running one
     if (!this.currentTask) {
       let task = this.queue.shift()
+
       // skip cancelled tasks
-      while (task && task.cancellationToken.cancelled) task = this.queue.shift()
+      while (task?.cancellationToken.cancelled) task = this.queue.shift()
       if (task) {
         try {
           this.currentTask = task
@@ -299,14 +337,16 @@ export class SequentialTaskQueue {
               this.cancelTask(task!, cancellationTokenReasons.timeout)
             }, task.timeout)
           }
+
           const res = task.callback.apply(undefined, task.args)
+
           if (res && isPromise(res)) {
             res.then(
-              result => {
+              (result) => {
                 task!.result = result
                 this.doneTask(task!)
               },
-              err => {
+              (err) => {
                 this.doneTask(task!, err)
               }
             )
@@ -336,28 +376,35 @@ export class SequentialTaskQueue {
     if (error) {
       this.emit(sequentialTaskQueueEvents.error, error)
       task.reject!.call(undefined, error)
-    } else if (task.cancellationToken.cancelled)
+    } else if (task.cancellationToken.cancelled) {
       task.reject!.call(undefined, task.cancellationToken.reason)
-    else task.resolve!.call(undefined, task.result)
+    } else {
+      task.resolve!.call(undefined, task.result)
+    }
 
     if (this.currentTask === task) {
       this.currentTask = undefined
       if (!this.queue.length) {
         this.emit(sequentialTaskQueueEvents.drained)
         this.callWaiters()
-      } else this.scheduler.schedule(() => this.next())
+      } else {
+        this.scheduler.schedule(() => this.next())
+      }
     }
   }
 
   private callWaiters() {
     const waiters = this.waiters.splice(0)
-    waiters.forEach(waiter => waiter())
+
+    waiters.forEach((waiter) => waiter())
   }
 }
 
+type TaskEntryFn = () => void
+
 interface TaskEntry {
   args: any[]
-  callback: Function
+  callback: TaskEntryFn
   timeout?: number
   timeoutHandle?: any
   cancellationToken: CancellationToken
@@ -369,6 +416,6 @@ interface TaskEntry {
 SequentialTaskQueue.defaultScheduler = {
   schedule:
     typeof setImmediate === 'function'
-      ? callback => setImmediate(callback as (...args: any[]) => void)
-      : callback => setTimeout(callback as (...args: any[]) => void, 0),
+      ? (callback) => setImmediate(() => callback())
+      : (callback) => setTimeout(() => callback(), 0),
 }
