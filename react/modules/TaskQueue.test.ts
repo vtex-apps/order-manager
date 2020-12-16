@@ -62,7 +62,7 @@ describe('TaskQueue', () => {
     expect(results).toEqual(['1', '3', '4'])
   })
 
-  it('should cancel a running task if a newer one with same id is pushed to the queue', async () => {
+  it('should not cancel a running task if a newer one with same id is pushed to the queue', async () => {
     const queue = new TaskQueue()
     const tasks: Array<PromiseLike<any>> = []
 
@@ -77,9 +77,7 @@ describe('TaskQueue', () => {
 
     tasks.push(queue.enqueue(outerTask, 'someId'))
 
-    await expect(tasks[0]).rejects.toEqual(
-      expect.objectContaining({ code: TASK_CANCELLED_CODE })
-    )
+    expect(await tasks[0]).toEqual('foo')
     expect(await tasks[1]).toEqual('bar')
   })
 
@@ -203,19 +201,18 @@ describe('TaskQueue', () => {
       )
     )
 
-    // The task above cancels the first task, so we
-    // need to run the immediates again so it is the head
-    // of the queue
-    jest.runAllImmediates()
+    // The task above shouldn't cancel the first task, because
+    // it is the head of the queue (and we can't cancel an in-progress
+    // task)
+    jest.advanceTimersByTime(1000)
 
+    expect(await tasks[0]).toEqual('task 1')
+
+    // Run scheduler function
+    jest.runAllImmediates()
+    // Run timer to completion for the second task
     jest.advanceTimersByTime(500)
 
-    await expect(tasks[0]).rejects.toEqual(
-      expect.objectContaining({
-        code: TASK_CANCELLED_CODE,
-        index: 0,
-      })
-    )
     expect(await tasks[1]).toBe('task 2')
 
     jest.runAllTimers()
