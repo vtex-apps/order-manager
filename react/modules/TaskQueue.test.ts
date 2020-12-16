@@ -2,7 +2,7 @@ import { TaskQueue } from './TaskQueue'
 import { QueueStatus, TASK_CANCELLED_CODE } from '../constants'
 
 const createScheduledTask = (task: () => any, time: number) => () =>
-  new Promise(resolve => {
+  new Promise((resolve) => {
     setTimeout(() => resolve(task()), time)
   })
 
@@ -35,22 +35,27 @@ describe('TaskQueue', () => {
       createScheduledTask(() => results.push('1'), 20),
       'foo'
     )
+
     const task2 = queue.enqueue(
       createScheduledTask(() => results.push('2'), 5),
       'bar'
     )
+
     const task3 = queue.enqueue(
       createScheduledTask(() => results.push('3'), 5),
       'baz'
     )
+
     const task4 = queue.enqueue(
       createScheduledTask(() => results.push('4'), 5),
       'bar'
     )
 
-    expect(task2).rejects.toEqual({
-      code: TASK_CANCELLED_CODE,
-    })
+    await expect(task2).rejects.toEqual(
+      expect.objectContaining({
+        code: TASK_CANCELLED_CODE,
+      })
+    )
 
     await Promise.all([task1, task3, task4])
 
@@ -65,19 +70,21 @@ describe('TaskQueue', () => {
 
     const outerTask = async () => {
       tasks.push(queue.enqueue(innerTask, 'someId'))
-      await createScheduledTask(() => {}, 10)
+      await createScheduledTask(() => {}, 10)()
+
       return 'foo'
     }
 
     tasks.push(queue.enqueue(outerTask, 'someId'))
 
-    await expect(tasks[0]).resolves.toEqual('foo')
-    await expect(tasks[1]).resolves.toEqual('bar')
+    expect(await tasks[0]).toEqual('foo')
+    expect(await tasks[1]).toEqual('bar')
   })
 
   it('should emit a Fulfilled event only when the queue becomes empty', async () => {
     const queue = new TaskQueue()
     const mockFulfilledCb = jest.fn()
+
     queue.listen(QueueStatus.FULFILLED, mockFulfilledCb)
 
     const task1 = queue.enqueue(createScheduledTask(() => {}, 5))
@@ -96,13 +103,16 @@ describe('TaskQueue', () => {
   it('should emit a Pending event only when the queue is free and receives a task', async () => {
     const queue = new TaskQueue()
     const mockPendingCb = jest.fn()
+
     queue.listen(QueueStatus.PENDING, mockPendingCb)
 
     expect(mockPendingCb).toHaveBeenCalledTimes(0)
     const task1 = queue.enqueue(createScheduledTask(() => {}, 5))
+
     expect(mockPendingCb).toHaveBeenCalledTimes(1)
     const task2 = queue.enqueue(createScheduledTask(() => {}, 5))
     const task3 = queue.enqueue(createScheduledTask(() => {}, 5))
+
     expect(mockPendingCb).toHaveBeenCalledTimes(1)
 
     await Promise.all([task1, task2, task3])
@@ -120,6 +130,7 @@ describe('TaskQueue', () => {
     const unlisten = queue.listen(QueueStatus.PENDING, mockPendingCb)
 
     const task = queue.enqueue(async () => {})
+
     expect(mockPendingCb).toHaveBeenCalledTimes(1)
     await task
 
@@ -131,11 +142,14 @@ describe('TaskQueue', () => {
   it('should remove a single listener callback when unlisten is called', async () => {
     const queue = new TaskQueue()
     const mockPendingCb = jest.fn()
+
     queue.listen(QueueStatus.PENDING, mockPendingCb)
     const unlisten = queue.listen(QueueStatus.PENDING, mockPendingCb)
+
     queue.listen(QueueStatus.PENDING, mockPendingCb)
 
     const task = queue.enqueue(async () => {})
+
     expect(mockPendingCb).toHaveBeenCalledTimes(3)
     await task
 
@@ -146,16 +160,102 @@ describe('TaskQueue', () => {
 
   it('should return correct values when isWaiting is called', async () => {
     const queue = new TaskQueue()
+
     queue.enqueue(createScheduledTask(() => {}, 20))
-    const secondTaskStarts = new Promise((resolve: any) =>
-      queue.enqueue(async () => {
-        resolve()
-        await createScheduledTask(() => {}, 5)
-      }, 'TaskID')
-    )
+    const secondTaskEnds = new Promise<void>((resolve) => {
+      queue
+        .enqueue(
+          createScheduledTask(() => {}, 5),
+          'TaskID'
+        )
+        .then(resolve)
+    })
 
     expect(queue.isWaiting('TaskID')).toEqual(true)
-    await secondTaskStarts
+    await secondTaskEnds
     expect(queue.isWaiting('TaskID')).toEqual(false)
+  })
+
+  it('should pass correct index value when task is cancelled', async () => {
+    jest.useFakeTimers()
+
+    const queue = new TaskQueue()
+
+    const tasks = []
+
+    tasks.push(
+      queue.enqueue(
+        createScheduledTask(() => 'task 1', 1000),
+        'myTaskId'
+      )
+    )
+
+    // Run immediates to add the task above to the
+    // head of the queue
+    jest.runAllImmediates()
+
+    tasks.push(
+      queue.enqueue(
+        createScheduledTask(() => 'task 2', 500),
+        'myTaskId'
+      )
+    )
+
+    // The task above shouldn't cancel the first task, because
+    // it is the head of the queue (and we can't cancel an in-progress
+    // task)
+    jest.advanceTimersByTime(1000)
+
+    expect(await tasks[0]).toEqual('task 1')
+
+    // Run scheduler function
+    jest.runAllImmediates()
+    // Run timer to completion for the second task
+    jest.advanceTimersByTime(500)
+
+    expect(await tasks[1]).toBe('task 2')
+
+    jest.runAllTimers()
+
+    // Push task without id, it shouldn't be "cancealable"
+    tasks.push(queue.enqueue(createScheduledTask(() => 'task 3', 500)))
+
+    // Run immediates so the task above is in the head of the queue
+    jest.runAllImmediates()
+
+    tasks.push(
+      queue.enqueue(
+        createScheduledTask(() => 'task 4', 500),
+        'myTaskId'
+      )
+    )
+
+    tasks.push(
+      queue.enqueue(
+        createScheduledTask(() => 'task 5', 500),
+        'myTaskId'
+      )
+    )
+
+    // Run the first task in the head to completion
+    jest.advanceTimersByTime(500)
+
+    // Run immediates so the next task is moved to the head
+    jest.runAllImmediates()
+
+    expect(await tasks[2]).toBe('task 3')
+
+    await expect(tasks[3]).rejects.toEqual(
+      expect.objectContaining({
+        code: TASK_CANCELLED_CODE,
+        index: 1,
+      })
+    )
+
+    jest.runAllImmediates()
+
+    jest.advanceTimersByTime(500)
+
+    expect(await tasks[4]).toBe('task 5')
   })
 })
