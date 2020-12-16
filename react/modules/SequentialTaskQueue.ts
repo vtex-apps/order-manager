@@ -230,10 +230,10 @@ export class SequentialTaskQueue {
       return queueIndex
     }
 
-    // Add 1 here because the queue is always missing the first
-    // element, which is stored in `this.currentTask`, so we need
-    // to shift the index by 1.
-    return queueIndex + 1
+    // The `currentTask` is also part of the queue, although
+    // it isn't in the `queue` array, so we should account for
+    // its existence and shift the index by 1 if it is set.
+    return queueIndex + (this.currentTask !== undefined ? 1 : 0)
   }
 
   /**
