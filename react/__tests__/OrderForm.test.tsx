@@ -1,6 +1,13 @@
-import React, { FunctionComponent, useEffect, useCallback } from 'react'
-import { fireEvent, render, wait } from '@vtex/test-tools/react'
-import { Item } from 'vtex.checkout-graphql'
+import type { FunctionComponent } from 'react'
+import React, { useEffect, useCallback } from 'react'
+import {
+  fireEvent,
+  render,
+  wait,
+  act,
+  flushPromises,
+} from '@vtex/test-tools/react'
+import type { Item } from 'vtex.checkout-graphql'
 import OrderForm from 'vtex.checkout-resources/QueryOrderForm'
 
 import { mockOrderForm } from '../__fixtures__/orderForm'
@@ -32,7 +39,7 @@ describe('OrderForm', () => {
       const { setOrderForm, orderForm } = useOrderForm()
 
       const updateValue = useCallback(() => {
-        setOrderForm(prevOrderForm => ({
+        setOrderForm((prevOrderForm) => ({
           ...prevOrderForm,
           value: prevOrderForm.value + 10,
         }))
@@ -55,14 +62,17 @@ describe('OrderForm', () => {
       { graphql: { mocks: [mockQuery] } }
     )
 
-    await wait(() => jest.runAllTimers())
+    act(() => jest.runAllTimers())
+
+    await act(async () => {
+      await new Promise((resolve) => resolve())
+    })
 
     expect(getByText(`${mockOrderForm.value}`)).toBeTruthy()
 
     const button = getByText('update')
-    fireEvent.click(button)
 
-    await wait(() => jest.runAllTimers())
+    fireEvent.click(button)
 
     expect(getByText(`${mockOrderForm.value + 10}`)).toBeTruthy()
   })
@@ -76,7 +86,7 @@ describe('OrderForm', () => {
           return
         }
 
-        setOrderForm(prevOrderForm => {
+        setOrderForm((prevOrderForm) => {
           return {
             ...prevOrderForm,
             value: prevOrderForm.value + 20,
@@ -96,7 +106,11 @@ describe('OrderForm', () => {
       { graphql: { mocks: [mockQuery] } }
     )
 
-    await wait(() => jest.runAllTimers())
+    act(() => jest.runAllTimers())
+
+    await act(async () => {
+      await flushPromises()
+    })
 
     expect(getByText(`${mockOrderForm.value + 20}`)).toBeTruthy()
   })
@@ -123,7 +137,11 @@ describe('OrderForm', () => {
       { graphql: { mocks: [mockQuery] } }
     )
 
-    await wait(() => jest.runAllTimers())
+    act(() => jest.runAllTimers())
+
+    await act(async () => {
+      await flushPromises()
+    })
 
     expect(getByText(mockOrderForm.items[0].name)).toBeTruthy()
     expect(getByText(mockOrderForm.items[1].name)).toBeTruthy()
@@ -137,8 +155,10 @@ describe('OrderForm', () => {
       const handleClick = () => {
         const newItem = orderForm && {
           ...orderForm.items[1],
+          id: '10231',
           name: 'Mirai zura!',
         }
+
         setOrderForm({ items: [newItem] })
       }
 
@@ -163,11 +183,10 @@ describe('OrderForm', () => {
       { graphql: { mocks: [mockQuery] } }
     )
 
-    await wait(() => {
-      jest.runAllTimers()
-      const button = getByText('update')
-      fireEvent.click(button)
-    })
+    const button = getByText('update')
+
+    fireEvent.click(button)
+
     expect(getByText('Mirai zura!')).toBeTruthy()
   })
 
@@ -197,7 +216,7 @@ describe('OrderForm', () => {
 
         return (
           <ul>
-            {orderForm.items?.map(item => (
+            {orderForm.items?.map((item) => (
               <li key={item.id}>{item.name}</li>
             ))}
           </ul>
@@ -215,7 +234,13 @@ describe('OrderForm', () => {
         { graphql: { mocks: [orderFormMockQuery] } }
       )
 
-      await wait(() => jest.runAllTimers())
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      await act(async () => {
+        await flushPromises()
+      })
 
       expect(JSON.parse(localStorage.getItem('orderform')!).id).toBe(
         'new-order-form'
@@ -251,7 +276,7 @@ describe('OrderForm', () => {
 
         return (
           <ul>
-            {orderForm.items?.map(item => (
+            {orderForm.items?.map((item) => (
               <li key={item.id}>{item.name}</li>
             ))}
           </ul>
@@ -269,7 +294,13 @@ describe('OrderForm', () => {
         { graphql: { mocks: [orderFormMockQuery] } }
       )
 
-      await wait(() => jest.runAllTimers())
+      act(() => {
+        jest.runAllTimers()
+      })
+
+      await act(async () => {
+        await flushPromises()
+      })
 
       const localOrderForm = JSON.parse(localStorage.getItem('orderform')!)
 
