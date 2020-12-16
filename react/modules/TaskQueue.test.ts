@@ -177,4 +177,88 @@ describe('TaskQueue', () => {
     await secondTaskEnds
     expect(queue.isWaiting('TaskID')).toEqual(false)
   })
+
+  it('should pass correct index value when task is cancelled', async () => {
+    jest.useFakeTimers()
+
+    const queue = new TaskQueue()
+
+    const tasks = []
+
+    tasks.push(
+      queue.enqueue(
+        createScheduledTask(() => 'task 1', 1000),
+        'myTaskId'
+      )
+    )
+
+    // Run immediates to add the task above to the
+    // head of the queue
+    jest.runAllImmediates()
+
+    tasks.push(
+      queue.enqueue(
+        createScheduledTask(() => 'task 2', 500),
+        'myTaskId'
+      )
+    )
+
+    // The task above cancels the first task, so we
+    // need to run the immediates again so it is the head
+    // of the queue
+    jest.runAllImmediates()
+
+    jest.advanceTimersByTime(500)
+
+    await expect(tasks[0]).rejects.toEqual(
+      expect.objectContaining({
+        code: TASK_CANCELLED_CODE,
+        index: 0,
+      })
+    )
+    expect(await tasks[1]).toBe('task 2')
+
+    jest.runAllTimers()
+
+    // Push task without id, it shouldn't be "cancealable"
+    tasks.push(queue.enqueue(createScheduledTask(() => 'task 3', 500)))
+
+    // Run immediates so the task above is in the head of the queue
+    jest.runAllImmediates()
+
+    tasks.push(
+      queue.enqueue(
+        createScheduledTask(() => 'task 4', 500),
+        'myTaskId'
+      )
+    )
+
+    tasks.push(
+      queue.enqueue(
+        createScheduledTask(() => 'task 5', 500),
+        'myTaskId'
+      )
+    )
+
+    // Run the first task in the head to completion
+    jest.advanceTimersByTime(500)
+
+    // Run immediates so the next task is moved to the head
+    jest.runAllImmediates()
+
+    expect(await tasks[2]).toBe('task 3')
+
+    await expect(tasks[3]).rejects.toEqual(
+      expect.objectContaining({
+        code: TASK_CANCELLED_CODE,
+        index: 1,
+      })
+    )
+
+    jest.runAllImmediates()
+
+    jest.advanceTimersByTime(500)
+
+    expect(await tasks[4]).toBe('task 5')
+  })
 })

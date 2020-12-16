@@ -226,6 +226,7 @@ export class SequentialTaskQueue {
       .findIndex((taskEntry) => taskEntry.callback === task)
 
     if (queueIndex < 0) {
+      // Task not found, return -1
       return queueIndex
     }
 
