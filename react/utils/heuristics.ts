@@ -3,8 +3,8 @@ import type { OrderForm } from 'vtex.checkout-graphql'
 import { UNSYNC_ORDER_FORM_VALUE, DEFAULT_ORDER_FORM } from '../constants'
 
 const orderFormOptimizationEnabled =
-  window.__RUNTIME__.settings?.['vtex.store']?.enableOrderFormOptimization ??
-  false
+  (window.__RUNTIME__ as any).settings?.['vtex.store']
+    ?.enableOrderFormOptimization ?? false
 
 /**
  * Heuristic function to determine whether or not the local

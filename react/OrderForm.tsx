@@ -1,86 +1,41 @@
-import type { FC } from 'react'
-import React, {
-  createContext,
-  useContext,
-  useMemo,
-  useReducer,
-  useRef,
-  useEffect,
-  useState,
-} from 'react'
-import { useQuery } from 'react-apollo'
+import { useContext, useMemo, useCallback, useRef, useEffect } from 'react'
+import { useQuery, useMutation } from 'react-apollo'
 import OrderFormQuery from 'vtex.checkout-resources/QueryOrderForm'
-import type { ApolloError } from 'apollo-client'
+import { MutationClearOrderFormMessages } from 'vtex.checkout-resources'
 import type { OrderForm, QueryOrderFormArgs } from 'vtex.checkout-graphql'
-import { useSplunk } from 'vtex.checkout-splunk'
 import { useRuntime } from 'vtex.render-runtime'
-
-import { shouldUpdateOrderForm } from './utils/heuristics'
+import { ToastContext } from 'vtex.styleguide'
 import {
-  UNSYNC_ORDER_FORM_VALUE,
+  createOrderFormProvider,
   DEFAULT_ORDER_FORM,
-  QueueStatus,
-} from './constants'
-import { useOrderQueue, useQueueStatus } from './OrderQueue'
-import useOrderFormMessages from './modules/useOrderFormMessages'
+  useOrderForm,
+} from '@vtex/order-manager'
+import type { OrderFormUpdate } from '@vtex/order-manager/types/typings'
 
-type OrderFormUpdate =
-  | Partial<OrderForm>
-  | ((prevOrderForm: OrderForm) => Partial<OrderForm>)
-
-interface Context {
-  loading: boolean
-  orderForm: OrderForm
-  setOrderForm: (nextValue: OrderFormUpdate) => void
-  error: ApolloError | undefined
-}
-
-const noop = () => {}
+import { useOrderQueue, useQueueStatus, QueueStatus } from './OrderQueue'
 
 const CHECKOUT = 'checkout'
 
-const OrderFormContext = createContext<Context>({
-  orderForm: DEFAULT_ORDER_FORM,
-  setOrderForm: noop,
-  error: undefined,
-  loading: false,
-})
+function useClearOrderFormMessages() {
+  const [mutate] = useMutation<{
+    clearOrderFormMessages: OrderForm
+  }>(MutationClearOrderFormMessages)
 
-const reducer = (
-  prevOrderForm: OrderForm,
-  updateOrderForm: OrderFormUpdate
-) => {
-  if (typeof updateOrderForm === 'function') {
-    return {
-      ...prevOrderForm,
-      ...updateOrderForm({
-        ...prevOrderForm,
-        value:
-          prevOrderForm.value === UNSYNC_ORDER_FORM_VALUE
-            ? 0
-            : prevOrderForm.value,
-      }),
-    }
-  }
+  return useCallback(
+    async (input) => {
+      const { data } = await mutate({ variables: input })
 
-  return {
-    ...prevOrderForm,
-    ...updateOrderForm,
-  }
+      return { data: data?.clearOrderFormMessages }
+    },
+    [mutate]
+  )
 }
 
-const saveLocalOrderForm = (orderForm: OrderForm) => {
-  localStorage.setItem('orderform', JSON.stringify(orderForm))
-}
-
-const getLocalOrderForm = (): OrderForm | null => {
-  return typeof document === 'undefined'
-    ? null
-    : JSON.parse(localStorage.getItem('orderform') ?? 'null')
-}
-
-export const OrderFormProvider: FC = ({ children }) => {
-  const { logSplunk } = useSplunk()
+const useGetOrderForm = ({
+  setOrderForm,
+}: {
+  setOrderForm: (update: OrderFormUpdate<OrderForm>) => void
+}) => {
   const { page } = useRuntime()
 
   const shouldRefreshOutdatedData = page.includes(CHECKOUT)
@@ -89,7 +44,7 @@ export const OrderFormProvider: FC = ({ children }) => {
     refreshOutdatedData: shouldRefreshOutdatedData,
   })
 
-  const { loading, data, error, refetch } = useQuery<
+  const { data, loading, error, refetch } = useQuery<
     {
       orderForm: OrderForm
     },
@@ -99,22 +54,6 @@ export const OrderFormProvider: FC = ({ children }) => {
     fetchPolicy: 'no-cache',
     variables: variablesRef.current,
   })
-
-  const shouldUseLocalOrderForm =
-    typeof document !== 'undefined' && !navigator.onLine
-
-  const [orderForm, setOrderForm] = useReducer(
-    reducer,
-    (shouldUseLocalOrderForm ? getLocalOrderForm() : DEFAULT_ORDER_FORM) ??
-      DEFAULT_ORDER_FORM
-  )
-
-  // use a different variable to store the loading state because if some
-  // component uses the `loading` from the Apollo query they won't be perfectly
-  // synchronized with our `orderForm` state and could cause some anomalies.
-  const [orderFormLoading, setOrderFormLoading] = useState(
-    !shouldUseLocalOrderForm
-  )
 
   const { listen, enqueue } = useOrderQueue()
   const queueStatusRef = useQueueStatus(listen)
@@ -139,93 +78,28 @@ export const OrderFormProvider: FC = ({ children }) => {
     queueStatusRef,
   ])
 
-  useEffect(() => {
-    if (error) {
-      logSplunk({
-        level: 'Important',
-        type: 'Error',
-        workflowType: 'OrderManager',
-        workflowInstance: 'orderform-query',
-        event: {
-          message: error.message,
-        },
-      })
-      console.error(error.message)
-    }
-
-    if (loading || error || !data) {
-      return
-    }
-
-    const localOrderForm = getLocalOrderForm()
-
-    if (localOrderForm != null) {
-      if (
-        !shouldUpdateOrderForm(localOrderForm, data.orderForm) ||
-        // if the queue is fulfilled, we will use the remote order form
-        // regardless of the local status.
-        //
-        // if the queue is pending the remote order form isn't important because
-        // it is expected that when the last task in the queue is finalized, the
-        // component will call `setOrderForm` with the most up-to-date value.
-        queueStatusRef.current !== QueueStatus.FULFILLED
-      ) {
-        setOrderFormLoading(false)
-        setOrderForm((prevOrderForm) => {
-          if (prevOrderForm.id !== DEFAULT_ORDER_FORM.id) {
-            return prevOrderForm
-          }
-
-          return localOrderForm
-        })
-
-        return
-      }
-    }
-
-    setOrderForm(data.orderForm)
-    setOrderFormLoading(false)
-  }, [data, error, loading, logSplunk, queueStatusRef])
-
-  useEffect(() => {
-    saveLocalOrderForm(orderForm)
-  }, [orderForm])
-
-  useOrderFormMessages(orderForm, setOrderForm)
-
-  const value = useMemo<Context>(
+  const value = useMemo(
     () => ({
+      data,
+      loading,
       error,
-      orderForm: {
-        ...orderForm,
-        value:
-          orderForm.value === UNSYNC_ORDER_FORM_VALUE ? 0 : orderForm.value,
-        messages: {
-          ...orderForm.messages,
-          generalMessages: [],
-        },
-      },
-      setOrderForm,
-      loading: orderFormLoading,
     }),
-    [error, orderForm, orderFormLoading]
+    [data, loading, error]
   )
 
-  return (
-    <OrderFormContext.Provider value={value}>
-      {children}
-    </OrderFormContext.Provider>
-  )
+  return value
 }
 
-export const useOrderForm = () => {
-  const context = useContext(OrderFormContext)
-
-  if (context === undefined) {
-    throw new Error('useOrderForm must be used within a OrderFormProvider')
-  }
-
-  return context
+const useToast = () => {
+  return useContext(ToastContext)
 }
 
+const { OrderFormProvider } = createOrderFormProvider<OrderForm>({
+  defaultOrderForm: DEFAULT_ORDER_FORM,
+  useGetOrderForm,
+  useClearOrderFormMessages,
+  useToast,
+})
+
+export { OrderFormProvider, useOrderForm }
 export default { OrderFormProvider, useOrderForm }
