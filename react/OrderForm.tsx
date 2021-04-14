@@ -21,6 +21,7 @@ import {
 } from './constants'
 import { useOrderQueue, useQueueStatus } from './OrderQueue'
 import useOrderFormMessages from './modules/useOrderFormMessages'
+import { useRuntime } from 'vtex.render-runtime'
 
 type OrderFormUpdate =
   | Partial<OrderForm>
@@ -34,6 +35,8 @@ interface Context {
 }
 
 const noop = () => {}
+
+const CHECKOUT = 'checkout'
 
 const OrderFormContext = createContext<Context>({
   orderForm: DEFAULT_ORDER_FORM,
@@ -77,11 +80,18 @@ const getLocalOrderForm = (): OrderForm | null => {
 
 export const OrderFormProvider: FC = ({ children }) => {
   const { logSplunk } = useSplunk()
+  // const runtime = useRuntime
+  // const page = runtime().page
+
+  // console.log(page.includes(CHECKOUT))
   const { loading, data, error } = useQuery<{
     orderForm: OrderForm
   }>(OrderFormQuery, {
     ssr: false,
     fetchPolicy: 'no-cache',
+    // variables: {
+    //   refreshOutdatedData: page.includes(CHECKOUT)
+    // }
   })
 
   const shouldUseLocalOrderForm =
