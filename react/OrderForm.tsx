@@ -80,8 +80,7 @@ const getLocalOrderForm = (): OrderForm | null => {
 
 export const OrderFormProvider: FC = ({ children }) => {
   const { logSplunk } = useSplunk()
-  const runtime = useRuntime
-  const page = runtime().page
+  const { page } = useRuntime()
 
   const { loading, data, error } = useQuery<{
     orderForm: OrderForm

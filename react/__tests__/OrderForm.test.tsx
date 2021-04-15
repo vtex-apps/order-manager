@@ -17,6 +17,7 @@ import { OrderQueueProvider } from '../OrderQueue'
 const mockQuery = {
   request: {
     query: OrderForm,
+    variables: { refreshOutdatedData: false }
   },
   result: {
     data: {
@@ -197,6 +198,7 @@ describe('OrderForm', () => {
       const orderFormMockQuery = {
         request: {
           query: OrderForm,
+          variables: { refreshOutdatedData: false }
         },
         result: {
           data: {
@@ -253,6 +255,7 @@ describe('OrderForm', () => {
       const orderFormMockQuery = {
         request: {
           query: OrderForm,
+          variables: { refreshOutdatedData: false }
         },
         result: {
           data: {
