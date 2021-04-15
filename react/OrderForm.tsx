@@ -80,18 +80,17 @@ const getLocalOrderForm = (): OrderForm | null => {
 
 export const OrderFormProvider: FC = ({ children }) => {
   const { logSplunk } = useSplunk()
-  // const runtime = useRuntime
-  // const page = runtime().page
+  const runtime = useRuntime
+  const page = runtime().page
 
-  // console.log(page.includes(CHECKOUT))
   const { loading, data, error } = useQuery<{
     orderForm: OrderForm
   }>(OrderFormQuery, {
     ssr: false,
     fetchPolicy: 'no-cache',
-    // variables: {
-    //   refreshOutdatedData: page.includes(CHECKOUT)
-    // }
+    variables: {
+      refreshOutdatedData: page.includes(CHECKOUT)
+    }
   })
 
   const shouldUseLocalOrderForm =
