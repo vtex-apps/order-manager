@@ -1,27 +1,39 @@
+import { debug } from 'console'
+
 import type { FunctionComponent } from 'react'
 import React, { useEffect, useCallback } from 'react'
-import {
-  fireEvent,
-  render,
-  wait,
-  act,
-  flushPromises,
-} from '@vtex/test-tools/react'
+import { fireEvent, render, act, flushPromises } from '@vtex/test-tools/react'
 import type { Item } from 'vtex.checkout-graphql'
 import OrderForm from 'vtex.checkout-resources/QueryOrderForm'
+import * as renderRuntime from 'vtex.render-runtime'
 
-import { mockOrderForm } from '../__fixtures__/orderForm'
+import {
+  mockOrderForm,
+  refreshedMockOrderForm,
+} from '../__fixtures__/orderForm'
 import { OrderFormProvider, useOrderForm } from '../OrderForm'
 import { OrderQueueProvider } from '../OrderQueue'
 
 const mockQuery = {
   request: {
     query: OrderForm,
-    variables: { refreshOutdatedData: false }
+    variables: { refreshOutdatedData: false },
   },
   result: {
     data: {
       orderForm: mockOrderForm,
+    },
+  },
+}
+
+const refreshedMockQuery = {
+  request: {
+    query: OrderForm,
+    variables: { refreshOutdatedData: true },
+  },
+  result: {
+    data: {
+      orderForm: refreshedMockOrderForm,
     },
   },
 }
@@ -33,6 +45,64 @@ describe('OrderForm', () => {
 
   afterEach(() => {
     localStorage.clear()
+  })
+
+  // eslint-disable-next-line jest/expect-expect
+  /*
+   */
+  it.only('should refresh outdated data on entering checkout', async () => {
+    const mockedUseRuntime = jest
+      .spyOn(renderRuntime, 'useRuntime')
+      .mockImplementation(() => ({ page: 'product' }))
+
+    const Component: FunctionComponent = () => {
+      const { orderForm } = useOrderForm()
+
+      const { value } = orderForm.paymentData.installmentOptions[0] ?? {
+        value: null,
+      }
+
+      console.log({ value })
+
+      return <div>{orderForm.paymentData?.installmentOptions?.[0]?.value}</div>
+    }
+
+    const { queryByText, rerender, debug } = render(
+      <OrderQueueProvider>
+        <OrderFormProvider>
+          <Component />
+        </OrderFormProvider>
+      </OrderQueueProvider>,
+      { graphql: { mocks: [mockQuery, refreshedMockQuery] } }
+    )
+
+    act(() => jest.runAllTimers())
+
+    await act(async () => {
+      await new Promise<void>((resolve) => resolve())
+    })
+
+    expect(queryByText('100')).toBeInTheDocument()
+
+    mockedUseRuntime.mockImplementation(() => ({ page: 'checkout' }))
+    rerender(
+      <OrderQueueProvider>
+        <OrderFormProvider>
+          <Component />
+        </OrderFormProvider>
+      </OrderQueueProvider>
+    )
+
+    act(() => jest.runAllTimers())
+
+    await act(async () => {
+      await new Promise<void>((resolve) => resolve())
+    })
+
+    debug()
+
+    // expect(installmentValue).toBe('200')
+    expect(queryByText('200')).toBeInTheDocument()
   })
 
   it('should be possible to update order form with an update function', async () => {
@@ -198,7 +268,7 @@ describe('OrderForm', () => {
       const orderFormMockQuery = {
         request: {
           query: OrderForm,
-          variables: { refreshOutdatedData: false }
+          variables: { refreshOutdatedData: false },
         },
         result: {
           data: {
@@ -255,7 +325,7 @@ describe('OrderForm', () => {
       const orderFormMockQuery = {
         request: {
           query: OrderForm,
-          variables: { refreshOutdatedData: false }
+          variables: { refreshOutdatedData: false },
         },
         result: {
           data: {

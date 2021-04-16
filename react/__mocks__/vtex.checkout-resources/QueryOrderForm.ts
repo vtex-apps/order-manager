@@ -6,6 +6,11 @@ const orderForm = gql`
       id
       items
       canEditData
+      paymentData {
+        installmentOptions {
+          value
+        }
+      }
       clientProfileData {
         email
         firstName
