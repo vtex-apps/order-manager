@@ -1,5 +1,3 @@
-import { debug } from 'console'
-
 import type { FunctionComponent } from 'react'
 import React, { useEffect, useCallback } from 'react'
 import { fireEvent, render, act, flushPromises } from '@vtex/test-tools/react'
@@ -47,27 +45,26 @@ describe('OrderForm', () => {
     localStorage.clear()
   })
 
-  // eslint-disable-next-line jest/expect-expect
-  /*
-   */
-  it.only('should refresh outdated data on entering checkout', async () => {
+  it('should refresh outdated data on entering checkout', async () => {
     const mockedUseRuntime = jest
       .spyOn(renderRuntime, 'useRuntime')
-      .mockImplementation(() => ({ page: 'product' }))
+      .mockImplementation(
+        // @ts-expect-error: we do not want to mock the whole
+        // runtime object, only the page
+        () => ({ page: 'product' })
+      )
 
     const Component: FunctionComponent = () => {
       const { orderForm } = useOrderForm()
 
-      const { value } = orderForm.paymentData.installmentOptions[0] ?? {
-        value: null,
-      }
-
-      console.log({ value })
-
-      return <div>{orderForm.paymentData?.installmentOptions?.[0]?.value}</div>
+      return (
+        <div>
+          Installment: {orderForm.paymentData?.installmentOptions?.[0]?.value}
+        </div>
+      )
     }
 
-    const { queryByText, rerender, debug } = render(
+    const { queryByText, rerender } = render(
       <OrderQueueProvider>
         <OrderFormProvider>
           <Component />
@@ -82,9 +79,15 @@ describe('OrderForm', () => {
       await new Promise<void>((resolve) => resolve())
     })
 
-    expect(queryByText('100')).toBeInTheDocument()
+    const installmentParagraph = queryByText(/installment: /i)
 
-    mockedUseRuntime.mockImplementation(() => ({ page: 'checkout' }))
+    expect(installmentParagraph).toHaveTextContent(/installment: 100/i)
+
+    mockedUseRuntime.mockImplementation(
+      // @ts-expect-error: same as above
+      () => ({ page: 'checkout' })
+    )
+
     rerender(
       <OrderQueueProvider>
         <OrderFormProvider>
@@ -99,10 +102,11 @@ describe('OrderForm', () => {
       await new Promise<void>((resolve) => resolve())
     })
 
-    debug()
+    expect(installmentParagraph).toHaveTextContent(/installment: 200/i)
 
-    // expect(installmentValue).toBe('200')
-    expect(queryByText('200')).toBeInTheDocument()
+    mockedUseRuntime.mockImplementation(
+      jest.requireMock('vtex.render-runtime').mockedRuntimeHook
+    )
   })
 
   it('should be possible to update order form with an update function', async () => {
@@ -214,9 +218,9 @@ describe('OrderForm', () => {
       await flushPromises()
     })
 
-    expect(getByText(mockOrderForm.items[0].name)).toBeTruthy()
-    expect(getByText(mockOrderForm.items[1].name)).toBeTruthy()
-    expect(getByText(mockOrderForm.items[2].name)).toBeTruthy()
+    expect(getByText(mockOrderForm.items[0].name ?? '')).toBeTruthy()
+    expect(getByText(mockOrderForm.items[1].name ?? '')).toBeTruthy()
+    expect(getByText(mockOrderForm.items[2].name ?? '')).toBeTruthy()
   })
 
   it('should correctly update the order form', async () => {

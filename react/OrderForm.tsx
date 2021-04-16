@@ -83,7 +83,6 @@ export const OrderFormProvider: FC = ({ children }) => {
   const { logSplunk } = useSplunk()
   const { page } = useRuntime()
 
-  console.log({ page })
   const shouldRefreshOutdatedData = page.includes(CHECKOUT)
 
   const variablesRef = useRef({
@@ -126,9 +125,19 @@ export const OrderFormProvider: FC = ({ children }) => {
         refetch({ refreshOutdatedData: true }).then(
           ({ data: refreshedData }) => refreshedData.orderForm
         )
-      )
+      ).then((updatedOrderForm) => {
+        if (queueStatusRef.current === QueueStatus.FULFILLED) {
+          setOrderForm(updatedOrderForm)
+        }
+      })
     }
-  }, [enqueue, refetch, shouldRefreshOutdatedData])
+  }, [
+    enqueue,
+    refetch,
+    shouldRefreshOutdatedData,
+    setOrderForm,
+    queueStatusRef,
+  ])
 
   useEffect(() => {
     if (error) {

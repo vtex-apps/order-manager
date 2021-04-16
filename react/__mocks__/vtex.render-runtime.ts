@@ -1,6 +1,8 @@
 export const useSSR = () => false
 
-export const useRuntime = jest.fn((page = '') => ({
+export const mockedRuntimeHook = (page = '') => ({
   rootPath: '',
   page,
-}))
+})
+
+export const useRuntime = jest.fn(mockedRuntimeHook)
