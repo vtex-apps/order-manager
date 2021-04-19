@@ -1,8 +1,8 @@
 import { ToastContext } from 'vtex.styleguide'
-import { OrderForm, Message } from 'vtex.checkout-graphql'
-import { useState, useContext, useEffect, Dispatch } from 'react'
+import type { OrderForm, Message } from 'vtex.checkout-graphql'
+import type { Dispatch } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import { useMutation } from 'react-apollo'
-// @ts-expect-error: no typings yet
 import { MutationClearOrderFormMessages } from 'vtex.checkout-resources'
 
 import { useOrderQueue, useQueueStatus } from '../OrderQueue'
@@ -21,6 +21,7 @@ const useOrderFormMessages = (
   const [clearOrderFormMessages] = useMutation<{
     clearOrderFormMessages: OrderForm
   }>(MutationClearOrderFormMessages)
+
   const { enqueue, listen } = useOrderQueue()
   const queueStatusRef = useQueueStatus(listen)
 
@@ -30,7 +31,7 @@ const useOrderFormMessages = (
     }
 
     showToast(messages[0].text!)
-    setMessages(queue => queue.slice(1))
+    setMessages((queue) => queue.slice(1))
   }, [showToast, toastState.isToastVisible, messages])
 
   useEffect(() => {
@@ -38,11 +39,11 @@ const useOrderFormMessages = (
       return
     }
 
-    setMessages(prevMessages =>
+    setMessages((prevMessages) =>
       prevMessages.concat(orderForm.messages.generalMessages as Message[])
     )
 
-    setOrderForm(prevOrderForm => {
+    setOrderForm((prevOrderForm) => {
       return {
         ...prevOrderForm,
         messages: {
@@ -61,12 +62,12 @@ const useOrderFormMessages = (
     })
 
     enqueuePromise.then(
-      updatedOrderForm => {
+      (updatedOrderForm) => {
         if (queueStatusRef.current === QueueStatus.FULFILLED) {
           setOrderForm(updatedOrderForm)
         }
       },
-      err => {
+      (err) => {
         if (err.code === TASK_CANCELLED_CODE) {
           return
         }

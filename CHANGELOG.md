@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- `refreshOutdatedData` field in `orderForm` mutation
+
 ## [0.9.0] - 2020-12-16
 ### Added
 - Property `index` to cancelled event errors.

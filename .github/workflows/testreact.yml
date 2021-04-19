@@ -2,12 +2,15 @@ name: Test CI
 
 on:
   pull_request:
+    types:
+    - opened
+    - synchronize
+  push:
     branches:
-    - master
+    - main
 
 jobs:
   test-react:
-
     runs-on: ubuntu-latest
 
     steps:

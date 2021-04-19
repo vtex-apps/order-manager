@@ -1,17 +1,19 @@
+import type { FC } from 'react'
 import React, {
   createContext,
   useContext,
   useMemo,
   useReducer,
+  useRef,
   useEffect,
-  FC,
   useState,
 } from 'react'
 import { useQuery } from 'react-apollo'
 import OrderFormQuery from 'vtex.checkout-resources/QueryOrderForm'
-import { ApolloError } from 'apollo-client'
-import { OrderForm } from 'vtex.checkout-graphql'
+import type { ApolloError } from 'apollo-client'
+import type { OrderForm, QueryOrderFormArgs } from 'vtex.checkout-graphql'
 import { useSplunk } from 'vtex.checkout-splunk'
+import { useRuntime } from 'vtex.render-runtime'
 
 import { shouldUpdateOrderForm } from './utils/heuristics'
 import {
@@ -34,6 +36,8 @@ interface Context {
 }
 
 const noop = () => {}
+
+const CHECKOUT = 'checkout'
 
 const OrderFormContext = createContext<Context>({
   orderForm: DEFAULT_ORDER_FORM,
@@ -77,11 +81,23 @@ const getLocalOrderForm = (): OrderForm | null => {
 
 export const OrderFormProvider: FC = ({ children }) => {
   const { logSplunk } = useSplunk()
-  const { loading, data, error } = useQuery<{
-    orderForm: OrderForm
-  }>(OrderFormQuery, {
+  const { page } = useRuntime()
+
+  const shouldRefreshOutdatedData = page.includes(CHECKOUT)
+
+  const variablesRef = useRef({
+    refreshOutdatedData: shouldRefreshOutdatedData,
+  })
+
+  const { loading, data, error, refetch } = useQuery<
+    {
+      orderForm: OrderForm
+    },
+    QueryOrderFormArgs
+  >(OrderFormQuery, {
     ssr: false,
     fetchPolicy: 'no-cache',
+    variables: variablesRef.current,
   })
 
   const shouldUseLocalOrderForm =
@@ -100,8 +116,28 @@ export const OrderFormProvider: FC = ({ children }) => {
     !shouldUseLocalOrderForm
   )
 
-  const { listen } = useOrderQueue()
+  const { listen, enqueue } = useOrderQueue()
   const queueStatusRef = useQueueStatus(listen)
+
+  useEffect(() => {
+    if (shouldRefreshOutdatedData) {
+      enqueue(() =>
+        refetch({ refreshOutdatedData: true }).then(
+          ({ data: refreshedData }) => refreshedData.orderForm
+        )
+      ).then((updatedOrderForm) => {
+        if (queueStatusRef.current === QueueStatus.FULFILLED) {
+          setOrderForm(updatedOrderForm)
+        }
+      })
+    }
+  }, [
+    enqueue,
+    refetch,
+    shouldRefreshOutdatedData,
+    setOrderForm,
+    queueStatusRef,
+  ])
 
   useEffect(() => {
     if (error) {
@@ -135,13 +171,14 @@ export const OrderFormProvider: FC = ({ children }) => {
         queueStatusRef.current !== QueueStatus.FULFILLED
       ) {
         setOrderFormLoading(false)
-        setOrderForm(prevOrderForm => {
+        setOrderForm((prevOrderForm) => {
           if (prevOrderForm.id !== DEFAULT_ORDER_FORM.id) {
             return prevOrderForm
           }
 
           return localOrderForm
         })
+
         return
       }
     }
@@ -183,6 +220,7 @@ export const OrderFormProvider: FC = ({ children }) => {
 
 export const useOrderForm = () => {
   const context = useContext(OrderFormContext)
+
   if (context === undefined) {
     throw new Error('useOrderForm must be used within a OrderFormProvider')
   }
