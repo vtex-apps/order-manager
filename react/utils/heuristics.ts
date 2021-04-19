@@ -1,4 +1,4 @@
-import { OrderForm } from 'vtex.checkout-graphql'
+import type { OrderForm } from 'vtex.checkout-graphql'
 
 import { UNSYNC_ORDER_FORM_VALUE, DEFAULT_ORDER_FORM } from '../constants'
 
