@@ -1,9 +1,10 @@
 import {
-  QueueStatus,
   OrderQueueProvider,
-  useOrderQueue,
   useQueueStatus,
-} from './modules/OrderQueue'
+  useOrderQueue,
+} from '@vtex/order-manager'
+
+import { QueueStatus } from './constants'
 
 export { OrderQueueProvider, useOrderQueue, useQueueStatus, QueueStatus }
 export default {
