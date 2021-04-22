@@ -55,8 +55,8 @@ const useGetOrderForm = ({
     variables: variablesRef.current,
   })
 
-  const { listen, enqueue } = useOrderQueue()
-  const queueStatusRef = useQueueStatus(listen)
+  const { enqueue } = useOrderQueue()
+  const queueStatusRef = useQueueStatus()
 
   useEffect(() => {
     if (shouldRefreshOutdatedData) {
