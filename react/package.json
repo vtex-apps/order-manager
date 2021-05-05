@@ -5,7 +5,7 @@
   },
   "dependencies": {
     "@vtex/css-handles": "^1.0.0",
-    "@vtex/order-manager": "^0.5.1",
+    "@vtex/order-manager": "^0.5.2",
     "classnames": "^2.2.6",
     "react": "^16.8.3",
     "react-apollo": "^3.1.3",

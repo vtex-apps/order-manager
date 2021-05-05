@@ -11,8 +11,22 @@ import {
   useOrderForm,
 } from '@vtex/order-manager'
 import type { OrderFormUpdate } from '@vtex/order-manager/types/typings'
+import { useSplunk } from 'vtex.checkout-splunk'
 
 import { useOrderQueue, useQueueStatus, QueueStatus } from './OrderQueue'
+
+function useLogger() {
+  const { logSplunk } = useSplunk()
+
+  const log = useCallback(
+    ({ type, level, event, workflowType, workflowInstance }) => {
+      logSplunk({ type, level, event, workflowType, workflowInstance })
+    },
+    [logSplunk]
+  )
+
+  return { log }
+}
 
 const CHECKOUT = 'checkout'
 
@@ -99,6 +113,7 @@ const { OrderFormProvider } = createOrderFormProvider<OrderForm>({
   useGetOrderForm,
   useClearOrderFormMessages,
   useToast,
+  useLogger,
 })
 
 export { OrderFormProvider, useOrderForm }
