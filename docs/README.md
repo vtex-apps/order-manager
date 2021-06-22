@@ -2,6 +2,17 @@
 
 > Centralizes the requests queue to the Checkout API and manages order form data.
 
+## Warning 🚨
+
+This repository contains **experimental** code for VTEX Checkout and should **not** be used in production.
+
+This code is "experimental" for various reasons:
+- Some are not tested as rigorously as the main code.
+- Some are tested but not maintained.
+- It can suffer from significant changes (breaking changes) without further notice.
+
+**Use it at your own risk!** ☠️
+
 ## Usage
 
 ```tsx
