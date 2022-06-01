@@ -50,12 +50,13 @@ const useGetOrderForm = ({
 }: {
   setOrderForm: (update: OrderFormUpdate<OrderForm>) => void
 }) => {
-  const { page } = useRuntime()
+  const { page, query } = useRuntime()
 
   const shouldRefreshOutdatedData = page.includes(CHECKOUT)
 
   const variablesRef = useRef({
     refreshOutdatedData: shouldRefreshOutdatedData,
+    orderFormId: query?.['orderFormId']
   })
 
   const { data, loading, error, refetch } = useQuery<
