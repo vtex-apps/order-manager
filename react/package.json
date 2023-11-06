@@ -5,7 +5,7 @@
   },
   "dependencies": {
     "@vtex/css-handles": "^1.0.0",
-    "@vtex/order-manager": "^0.5.2",
+    "@vtex/order-manager": "^0.5.3",
     "classnames": "^2.2.6",
     "react": "^16.8.3",
     "react-apollo": "^3.1.3",
@@ -35,6 +35,11 @@
     "setupFilesAfterEnv": [
       "./setupTests.ts"
     ]
+  },
+  "resolutions": {
+    "@types/testing-library__dom": "6.12.1",
+    "@types/express": "4.16.0",
+    "@types/express-serve-static-core": "4.16.0"
   },
   "version": "0.12.0"
 }
