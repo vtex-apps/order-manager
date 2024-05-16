@@ -1,0 +1,23 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: order-manager
+  description: Centralizes the requests queue from Checkout IO to the Checkout API
+    and manages order form data.
+  annotations:
+    github.com/project-slug: vtex-apps/order-manager
+    vtex.com/o11y-os-index: ""
+    vtex.com/janus-acronym: ""
+    grafana/dashboard-selector: ""
+    backstage.io/techdocs-ref: dir:../
+  tags:
+    - typescript
+    - react
+spec:
+  type: library
+  lifecycle: experimental
+  owner: checkout-experience
+  system: checkout
+  dependsOn:
+    - component:checkout-graphql
+  subcomponentOf: checkout-cart
