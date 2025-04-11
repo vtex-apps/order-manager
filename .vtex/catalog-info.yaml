@@ -16,7 +16,7 @@ metadata:
 spec:
   type: library
   lifecycle: experimental
-  owner: checkout-experience
+  owner: te-0001
   system: checkout
   dependsOn:
     - component:checkout-graphql
