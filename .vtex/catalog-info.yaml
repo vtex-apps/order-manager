@@ -11,6 +11,8 @@ metadata:
     backstage.io/techdocs-ref: dir:../
     vtex.com/application-id: XU65FSBM
     vtex.com/platform-flow-id: Shopper#4
+    vtex.com/sdd-check-skip: 'true'
+    vtex.com/sdd-check-skip-reason: It is a public repo
   tags:
     - typescript
     - react
