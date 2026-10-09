@@ -1,6 +1,6 @@
 # Order Manager
 
-Centralizes the requests queue to the Checkout API and manages order form data.
+Centralizes the requests queue to the Checkout API and manages [orderForm](https://developers.vtex.com/docs/guides/orderform-fields) data.
 
 ## Support status
 
