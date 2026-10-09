@@ -1,17 +1,18 @@
 # Order Manager
 
-> Centralizes the requests queue to the Checkout API and manages order form data.
+Centralizes the requests queue to the Checkout API and manages [orderForm](https://developers.vtex.com/docs/guides/orderform-fields) data.
 
-## Warning 🚨
+## Support status
 
-This repository contains **experimental** code for VTEX Checkout and should **not** be used in production.
+This repository contains **experimental** code for VTEX Checkout. Although VTEX-maintained apps use `vtex.order-manager` in production, that internal use doesn't make its API a supported or stable contract for external or custom apps.
 
-This code is "experimental" for various reasons:
-- Some are not tested as rigorously as the main code.
-- Some are tested but not maintained.
-- It can suffer from significant changes (breaking changes) without further notice.
+Using `vtex.order-manager` for external or custom apps involves the following risks:
 
-**Use it at your own risk!** ☠️
+- Parts of the code may not be tested as rigorously as supported VTEX products.
+- Parts of the code may not be actively maintained.
+- Breaking changes may be released without prior notice.
+
+> ❗Use it only if you can accept these compatibility and support risks.
 
 ## Usage
 
