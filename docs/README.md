@@ -1,17 +1,18 @@
 # Order Manager
 
-> Centralizes the requests queue to the Checkout API and manages order form data.
+Centralizes the request queue to the Checkout API and manages [orderForm](https://developers.vtex.com/docs/guides/orderform-fields) data.
 
-## Warning 🚨
+## Support status
 
-This repository contains **experimental** code for VTEX Checkout and should **not** be used in production.
+This repository contains **experimental** code for VTEX Checkout. Although apps maintained by VTEX use `vtex.order-manager` in production, that internal use doesn't make its API a supported or stable contract for external or custom apps.
 
-This code is "experimental" for various reasons:
-- Some are not tested as rigorously as the main code.
-- Some are tested but not maintained.
-- It can suffer from significant changes (breaking changes) without further notice.
+Using `vtex.order-manager` for external or custom apps involves the following risks:
 
-**Use it at your own risk!** ☠️
+- Parts of the code may not be tested as rigorously as supported VTEX products.
+- Parts of the code may not be actively maintained.
+- Breaking changes may be released without prior notice.
+
+> ❗Use it only if you can accept these compatibility and support risks.
 
 ## Usage
 
@@ -46,7 +47,7 @@ Exposes the API to interact with the order queue. See the items below for more d
 
 > Returned by `useOrderQueue()`
 
-Add a task to the queue of requests to the Checkout API. `task` will be called when it's the first in the queue.
+Add a task to the request queue to the Checkout API. `task` will be called when it's the first in the queue.
 
 The optional param `id` can be used to duplicate requests. Example:
 
@@ -64,25 +65,25 @@ enqueue(taskB, "coupon");
 
 The point of this feature is to avoid making requests that are stale.
 
-Returns a promise that resolves when the task is completed. This promise has a method `.cancel()`. If this function is called, the queue will ignore this task if it hasn't started yet and the promise will immediately reject, returning an object with a property `code` with value `'TASK_CANCELLED'`.
+Returns a promise that resolves when the task is completed. This promise has a `.cancel()` method. If this function is called, the queue will ignore this task if it hasn't started yet and the promise will immediately reject, returning an object with a property `code` with value `'TASK_CANCELLED'`.
 
 #### Use cases
 
-1. If the user submits a coupon code, the task is scheduled, then changes and type another coupon code, we can avoid making the first request since the second will superseed it.
+1. If the user submits a coupon code (task is scheduled) and then changes and enters another coupon code, we can avoid making the first request because the second will supersede it.
 
 ### `listen(event: QueueStatus, callback: Function): UnsubcribeFunction`
 
 > Returned by `useOrderQueue()`
 
-Once this function is called, the `callback` function will be called whenever the specified `event` is emitted until the returned function is called.
+Once this function is called, the `callback` function will be called whenever the specified `event` is triggered until the returned function is called.
 
-An event is emitted whenever the queue changes its status (see [QueueStatus](#QueueStatus)). For instance, if the queue changes from `QueueStatus.FULFILLED` to `QueueStatus.PENDING`, a `QueueStatus.PENDING` event is emitted.
+An event is triggered whenever the queue changes its status (see [QueueStatus](#QueueStatus)). For instance, if the queue changes from `QueueStatus.FULFILLED` to `QueueStatus.PENDING`, a `QueueStatus.PENDING` event is triggered.
 
 Returns a function to unsubscribe the callback from the specified event.
 
 #### Use cases
 
-1. Makes it possible to add loaders or disable the Checkout button when there are tasks to resolve.
+1. Allows adding loaders or disabling the Checkout button when there are tasks to resolve.
 
 ### `isWaiting(id: string): boolean`
 
@@ -92,13 +93,13 @@ Returns `true` if there is a task in the queue with the specified `id` that hasn
 
 #### Use cases
 
-1. If you want to enqueue a task but a similar one is already in the queue, you can use this function to determine whether the older one has already been run. In case it hasn't, you can cancel it, merge both tasks and enqueue the merged task.
+1. If you want to queue a task but a similar one is already in the queue, you can use this function to determine whether the older one has already been run. In case it hasn't, you can cancel it, merge both tasks, and queue the merged task.
 
 ### `QueueStatus`
 
 An enum that represents the queue states. The possible values are:
 
-- `QueueStatus.PENDING`: There is a task running and there might be other tasks enqueued.
+- `QueueStatus.PENDING`: There's a task running and there might be other tasks queued.
 - `QueueStatus.FULFILLED`: The queue is empty and no task is being run.
 
 ### `useQueueStatus(listen: ListenFunction): React.MutableRefObject<QueueEvent>`
@@ -107,7 +108,7 @@ A helper hook that takes the `listen` function returned by `useOrderQueue` and r
 
 #### Use cases
 
-1. Makes it possible to perform actions conditioned on the queue status.
+1. Allows performing actions conditioned on the queue status.
 
 #### Example
 
@@ -130,7 +131,7 @@ const Component: FunctionComponent = () => {
 
 #### Notes
 
-- Keep in mind that mutating the `ref` object does not trigger a re-render of the React component. If you want to display content depending on the queue status, consider using states controlled by queue events instead.
+- Keep in mind that mutating the `ref` object doesn't trigger a re-render of the React component. If you want to display content depending on the queue status, consider using states controlled by queue events instead.
 
 ## `OrderForm` API
 
@@ -146,7 +147,7 @@ This flag is set to `true` only when `OrderManager` is loading the order form du
 
 #### Use cases
 
-1. Make it possible to render a loading state when loading a page.
+1. Allows rendering a loading state when loading a page.
 
 ### `orderForm: OrderForm`
 
@@ -158,7 +159,7 @@ Contains data from the order form. Do not modify this directly, use `setOrderFor
 
 > Returned by `useOrderForm()`
 
-Updates the order form stored in `OrderManager`. This should be called after each mutation to ensure that client data does not get out of sync with server data and that other `OrderManager` consumers can react to this update.
+Updates the order form stored in `OrderManager`. This should be called after each mutation to ensure that client data doesn't get out of sync with server data and that other `OrderManager` consumers can react to this update.
 
 ### `error: ApolloError | undefined`
 
